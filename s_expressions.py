@@ -2,6 +2,7 @@ import argparse
 import sexpdata as sex
 import math
 import numpy as np
+from genetic_programmng import ga
 
 SAMPLE_EXP_1 = "(mul (add 1 2) (log 8))"
 SAMPLE_EXP_2 = "(max (data 0) (data 1))"
@@ -157,16 +158,9 @@ def open_training_data():
             
     return x_values, y_values
 
-def calculate_fitness(sexp):
-    x_values, y_values = open_training_data()
-    total = 0
-    factor = 1/m
-    
-    for i in range(m-1):
-        difference = y_values[i] - evaluate(x_values[i])
-        total += difference ** 2
-        
-    return factor * total
+def squared_error(sexp):
+    difference = y - evaluate(sexp)
+    return difference ** 2
     
 def main():
     # Create ArgumentParser object
@@ -204,12 +198,24 @@ if __name__ == "__main__":
     q = int(q)
     n = int(n)
     m = int(m)
-    x = [float(num) for num in x.split(' ')]
+    
     
     
     training_data = training_data # Split training data
     if q == 1:
+        x = [float(num) for num in x.split(' ')]
         result = evaluate(e)
         print(result)
     if q == 2:
-        calculate_fitness(e)
+        total = 0
+        factor = 1/m
+        x_values, y_values = open_training_data()
+        
+        for i in range(0, m-1):
+            x = x_values[i]
+            y = y_values[i]
+            total += squared_error(e)
+            
+        print(factor * total)
+    if q == 3:
+        ga()
