@@ -12,7 +12,7 @@ SAMPLE_EXP_1 = "(mul (add 1 2) (log 8))"
 SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 
 # Branch swap - swap 2 branches from parents
-def crossover(parent1, parent2, branch_index):
+def crossover(parent1, parent2, branch_index: int):
     return 1
 # Branch replacement - Pick a random branch, replace with newly generated branch
 def mutation(parent):
@@ -21,7 +21,7 @@ def mutation(parent):
     # generate new branch and add it where branch was deleted from
     return 1
 
-def tournament_selection(population, fitnesses, n, offspring_size):
+def tournament_selection(population: list, fitnesses: list, n: int, offspring_size: int):
     # for offspring_size times
         # pick n random solutions from population
         # copy one with highest fitness into offspring
@@ -40,7 +40,7 @@ def full_generation(depth) -> str:
         return f"({node_name} {children})"
 
 # Generates a population of given size - Ramped half and half
-def generate_population(population_size, max_depth):
+def generate_population(population_size: int, max_depth: int) -> list:
     population = []
     for _ in range(population_size):
         population.append(full_generation(max_depth))
@@ -49,7 +49,7 @@ def generate_population(population_size, max_depth):
 def calculate_fitness(solution):
     return 1
     
-def calclulate_fitnesses(population):
+def calclulate_fitnesses(population: list):
     fitnesses = []
     for solution in population:
         fitnesses.append(calculate_fitness(solution))
@@ -58,13 +58,7 @@ def calclulate_fitnesses(population):
 def ga(population_size: int, time_budget: int):
     time_elapsed = 0
     population = generate_population(population_size, 2)
-    
-    print(SAMPLE_EXP_1)
-    print(sex.loads(SAMPLE_EXP_1))
-    
-    sexp = full_generation(2)
-    sexp = sex.loads(sexp)
-    print(evaluate(sexp))
+
     fitnesses = calclulate_fitnesses(population)
     
     while time_elapsed > time_budget:
@@ -75,4 +69,4 @@ def ga(population_size: int, time_budget: int):
         time_elapsed +=1
     return 1
 
-ga(1,2)
+ga(3,2)
