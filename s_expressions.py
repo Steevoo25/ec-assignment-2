@@ -2,7 +2,7 @@ import argparse
 import sexpdata as sex
 import math
 import numpy as np
-from genetic_programmng import ga
+#from genetic_programmng import ga
 
 SAMPLE_EXP_1 = "(mul (add 1 2) (log 8))"
 SAMPLE_EXP_2 = "(max (data 0) (data 1))"
@@ -117,7 +117,6 @@ def evaluate(sexp):
     
         operator = str(sex.car(sexp))
         operands = sex.cdr(sexp)
-        
         if operator == 'add':
             return add(*operands)
         elif operator == 'sub':
@@ -193,30 +192,31 @@ def main():
     return question, expr, n , x, m, data
 
 if __name__ == "__main__":
-
     q, e, n, x, m, training_data = main()
     print(q, e, n, x, m , training_data)
     e = sex.loads(e)
     # Cast arguments to correct type
     q = int(q)
     n = int(n)
-    m = int(m)
+    
     
     training_data = training_data # Split training data
     if q == 1:
+        print(e)
         x = [float(num) for num in x.split(' ')]
         result = evaluate(e)
         print(result)
     if q == 2:
+        m = int(m)
         total = 0
         factor = 1/m
         x_values, y_values = open_training_data()
         
-        for i in range(0, m-1):
+        for i in range(0, m-1): # as x is global, update here
             x = x_values[i]
             y = y_values[i]
             total += squared_error(e)
             
         print(factor * total)
-    if q == 3:
-        ga()
+    # if q == 3:
+    #     ga()
