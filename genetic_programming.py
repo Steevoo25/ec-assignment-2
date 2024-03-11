@@ -31,7 +31,10 @@ def pow(exp1, exp2):
     return evaluate(exp1) ** evaluate(exp2)
 # CHECK FOR NEGATIVE?
 def sqrt(exp1):
-    return math.sqrt(evaluate(exp1))
+    exp1_eval = evaluate(exp1)
+    if exp1_eval == -1:
+        return 0
+    return math.sqrt(exp1)
 
 # Takes log2 of 1 expression
 def log(exp1):
@@ -42,23 +45,64 @@ def exp(exp1):
     return math.e ** evaluate(exp1)
 
 #returns larger value of exp1 and exp2
-def max(exp1, exp2):
-    return np.max((evaluate(exp1), evaluate(exp2)))
+def max(exp1, exp2) -> float:
+    exp1_eval = evaluate(exp1)
+    exp2_eval = evaluate(exp2)
+    print(exp1, exp1_eval)
+    print(exp2, exp2_eval)
+    
+    if exp1_eval > exp2_eval :
+        return exp1_eval
+    else:
+        return exp2_eval
 
+# Returns exp3 if exp1 <= exp2, otherwise returns exp4
 def ifleq(exp1, exp2, exp3, exp4):
     if evaluate(exp1) <= evaluate(exp2):
         return evaluate(exp3)
     else:
         return evaluate(exp4)
 
-def data(exp1, n):
-    return np.abs(math.floor(evaluate(exp1))) % n
+# Returns the element at exp1th element (floored, absed and modded)
+# n is size of input vector x
+def data(exp1) -> int:
+    eval = evaluate(exp1)
+    floor = math.floor(eval)
+    index = np.abs(floor)
+    if not index == 0:
+        index = index % n 
+    print(index, x[index])
+    return x[index]
 
-def diff(exp1, exp2):
-    return evaluate(data(exp1)) -  evaluate(data(exp2))
+# Returns the difference between 2 elements
+def diff(exp1, exp2) -> int:
+    exp1_data = data(exp1)
+    exp2_data = data(exp2)
+    return exp1_data - exp2_data
 
+# Returns the average of a range between 2 indecies
 def avg(exp1, exp2):
-    return evaluate(exp1), evaluate(exp2)
+
+    k = np.abs(math.floor(evaluate(exp1))) % n
+    l = np.abs(math.floor(evaluate(exp2))) % n
+    print("k , l" , k , l)
+    if k == l:
+        return 0
+    
+    difference = np.abs(k - l) + 1
+    factor = 1/difference
+    sum = 0
+    
+    if k < l: #exp1 to exp2
+        print("k less")
+        for i in range(k, l+1):
+            sum += data(i)
+    else: # exp2 to exp1
+        print("k more")
+        for i in range(l, k):
+            sum += data(i)
+            
+    return factor * sum
 
 def evaluate(sexp):
     # if its an atom
@@ -94,7 +138,7 @@ def evaluate(sexp):
         elif operator == 'ifleq':
             return ifleq(*operands)
         elif operator == 'data':
-            return x[data(*operands, n)]
+            return data(*operands)
         elif operator == 'diff':
             return diff(*operands)
         elif operator == 'avg':
@@ -125,6 +169,11 @@ if __name__ == "__main__":
 
     q, e, n, x = main()
     print(q, e, n, x)
-    
+    # Cast arguments to correct type
+    q = int(q)
+    n = int(n)
+    x = [float(num) for num in x.split(',')]
     if q == 1:
-        evaluate(e)
+    
+        result = evaluate(sex.loads(e))
+        print(result)
