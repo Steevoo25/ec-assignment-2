@@ -202,8 +202,6 @@ if __name__ == "__main__":
     n = int(n)
     m = int(m)
     
-    
-    
     training_data = training_data # Split training data
     if q == 1:
         x = [float(num) for num in x.split(' ')]
