@@ -175,6 +175,9 @@ def main():
     parser.add_argument('-m', help='Size of training data')
     parser.add_argument('-data', help='filename containing training data')
     
+    parser.add_argument('-lambda', help='Population Size')
+    parser.add_argument('-time_budget', help='number of seconds to run algorithm')
+    
     # Parse the command line arguments
     args = parser.parse_args()
 
