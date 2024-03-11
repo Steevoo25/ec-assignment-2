@@ -29,7 +29,8 @@ def div(exp1, exp2):
 # Returns exp1 to the power of exp2
 def pow(exp1, exp2):
     return evaluate(exp1) ** evaluate(exp2)
-# CHECK FOR NEGATIVE?
+
+# Returns the square root of exp1
 def sqrt(exp1):
     exp1_eval = evaluate(exp1)
     if exp1_eval == -1:
@@ -40,6 +41,7 @@ def sqrt(exp1):
 def log(exp1):
     # ADD UNDEFINED CASE
     return math.log2(evaluate(exp1))
+
 # returns e^ exp1
 def exp(exp1):
     return math.e ** evaluate(exp1)
@@ -94,11 +96,9 @@ def avg(exp1, exp2):
     sum = 0
     
     if k < l: #exp1 to exp2
-        print("k less")
         for i in range(k, l+1):
             sum += data(i)
     else: # exp2 to exp1
-        print("k more")
         for i in range(l, k):
             sum += data(i)
             
@@ -154,6 +154,9 @@ def main():
     parser.add_argument('-n', help='dimension of unput vector n')
     parser.add_argument('-x', help='input vector')
     
+    parser.add_argument('-m', help='Size of training data')
+    parser.add_argument('-data', help='filename containing training data')
+    
     # Parse the command line arguments
     args = parser.parse_args()
 
@@ -174,6 +177,7 @@ if __name__ == "__main__":
     n = int(n)
     x = [float(num) for num in x.split(',')]
     if q == 1:
-    
         result = evaluate(sex.loads(e))
         print(result)
+    if q == 2:
+        
