@@ -9,50 +9,54 @@ SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 
 # adds 2 expressions
 def add(exp1, exp2):
-    return evaluate(exp1) + evaluate(exp2)
+    return float(evaluate(exp1)) + float(evaluate(exp2))
 
 # Subtracts exp2 from exp1
 def sub (exp1, exp2):
-    return evaluate(exp1) - evaluate(exp2)
+    return float(evaluate(exp1)) - float(evaluate(exp2))
     
 # Multiplies 2 expressions
 def mul(exp1, exp2):
-    return evaluate(exp1) * evaluate(exp2)
+    return float(evaluate(exp1)) * float(evaluate(exp2))
 
 # Divides exp1 by exp 2 as long as exp2 is not 0
 def div(exp1, exp2):
-    exp2_eval = evaluate(exp2)
+    exp2_eval = float(evaluate(exp2))
+    exp1_eval = float(evaluate(exp2))
     if exp2_eval == 0:
         return 0
     else:
-        return evaluate(exp1) / exp2_eval
+        return exp1_eval / exp2_eval
         
 # Returns exp1 to the power of exp2
 def pow(exp1, exp2):
-    return evaluate(exp1) ** evaluate(exp2)
+    return float(evaluate(exp1)) ** float(evaluate(exp2))
 
 # Returns the square root of exp1
 def sqrt(exp1):
-    exp1_eval = evaluate(exp1)
-    if exp1_eval == -1:
+    exp1_eval = float(evaluate(exp1))
+    if exp1_eval < 0:
         return 0
-    return math.sqrt(exp1)
+    return math.sqrt(exp1_eval)
 
 # Takes log2 of 1 expression
 def log(exp1):
-    # ADD UNDEFINED CASE
-    return math.log2(evaluate(exp1))
+    exp1_val = float(evaluate(exp1))
+    if exp1_val > 0:
+        return math.log2(exp1_val)
+    else:
+        return 0
 
 # returns e^ exp1
 def exp(exp1):
-    return math.e ** evaluate(exp1)
+    exp1_val = float(evaluate(exp1))
+
+    return math.e ** exp1_val
 
 #returns larger value of exp1 and exp2
 def max(exp1, exp2) -> float:
-    exp1_eval = evaluate(exp1)
-    exp2_eval = evaluate(exp2)
-    print(exp1, exp1_eval)
-    print(exp2, exp2_eval)
+    exp1_eval = float(evaluate(exp1))
+    exp2_eval = float(evaluate(exp2))
     
     if exp1_eval > exp2_eval :
         return exp1_eval
@@ -61,7 +65,7 @@ def max(exp1, exp2) -> float:
 
 # Returns exp3 if exp1 <= exp2, otherwise returns exp4
 def ifleq(exp1, exp2, exp3, exp4):
-    if evaluate(exp1) <= evaluate(exp2):
+    if float(evaluate(exp1)) <= float(evaluate(exp2)):
         return evaluate(exp3)
     else:
         return evaluate(exp4)
@@ -69,7 +73,7 @@ def ifleq(exp1, exp2, exp3, exp4):
 # Returns the element at exp1th element (floored, absed and modded)
 # n is size of input vector x
 def data(exp1) -> int:
-    eval = evaluate(exp1)
+    eval = float(evaluate(exp1))
     floor = math.floor(eval)
     index = np.abs(floor)
     if not index == 0:
@@ -103,7 +107,7 @@ def avg(exp1, exp2):
         for i in range(l, k):
             sum += data(i)
             
-    return factor * sum
+    return float(factor * sum)
 
 def evaluate(sexp):
     # if its an atom
@@ -117,32 +121,37 @@ def evaluate(sexp):
     
         operator = str(sex.car(sexp))
         operands = sex.cdr(sexp)
-        if operator == 'add':
-            return add(*operands)
-        elif operator == 'sub':
-            return sub(*operands)
-        elif operator == 'mul':
-            return mul(*operands)
-        elif operator == 'div':
-            return div(*operands)
-        elif operator == 'pow':
-            return pow(*operands)
-        elif operator == 'sqrt':
-            return sqrt(*operands)
-        elif operator == 'log':
-            return log(*operands)
-        elif operator == 'exp':
-            return exp(*operands)
-        elif operator == 'max':
-            return max(*operands)           
-        elif operator == 'ifleq':
-            return ifleq(*operands)
-        elif operator == 'data':
-            return data(*operands)
-        elif operator == 'diff':
-            return diff(*operands)
-        elif operator == 'avg':
-            return avg(*operands)
+        #print("operator", operator,"operands",  operands)
+        try:
+            if operator == 'add':
+                return add(*operands)
+            elif operator == 'sub':
+                return sub(*operands)
+            elif operator == 'mul':
+                return mul(*operands)
+            elif operator == 'div':
+                return div(*operands)
+            elif operator == 'pow':
+                return pow(*operands)
+            elif operator == 'sqrt':
+                return sqrt(*operands)
+            elif operator == 'log':
+                return log(*operands)
+            elif operator == 'exp':
+                return exp(*operands)
+            elif operator == 'max':
+                return max(*operands)           
+            elif operator == 'ifleq':
+                return ifleq(*operands)
+            elif operator == 'data':
+                return data(*operands)
+            elif operator == 'diff':
+                return diff(*operands)
+            elif operator == 'avg':
+                return avg(*operands)
+        except OverflowError:
+            print("Value too large for operation: ", operator, operands, " returning 0 for this step")
+            return 0
 
 def open_training_data():
     x_values = []
