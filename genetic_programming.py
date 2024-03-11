@@ -144,6 +144,30 @@ def evaluate(sexp):
         elif operator == 'avg':
             return avg(*operands)
 
+def open_training_data():
+    x_values = []
+    y_values = []
+    # open file
+    with open(training_data, 'r') as training_data_file:
+        for line in training_data_file: 
+            # split by tab
+            values = line.split('\t')
+            x_values.append(values[:-1])
+            y_values.append(values[-1])
+            
+    return x_values, y_values
+
+def calculate_fitness(sexp):
+    x_values, y_values = open_training_data()
+    total = 0
+    factor = 1/m
+    
+    for i in range(m-1):
+        difference = y_values[i] - evaluate(x_values[i])
+        total += difference ** 2
+        
+    return factor * total
+    
 def main():
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description='Example script to demonstrate argparse')
@@ -166,18 +190,26 @@ def main():
     n = args.n
     x = args.x
     
-    return question, expr, n , x
+    m = args.m
+    data = args.data
+    
+    return question, expr, n , x, m, data
 
 if __name__ == "__main__":
 
-    q, e, n, x = main()
-    print(q, e, n, x)
+    q, e, n, x, m, training_data = main()
+    print(q, e, n, x, m , training_data)
+    e = sex.loads(e)
     # Cast arguments to correct type
     q = int(q)
     n = int(n)
-    x = [float(num) for num in x.split(',')]
+    m = int(m)
+    x = [float(num) for num in x.split(' ')]
+    
+    
+    training_data = training_data # Split training data
     if q == 1:
-        result = evaluate(sex.loads(e))
+        result = evaluate(e)
         print(result)
     if q == 2:
-        
+        calculate_fitness(e)
