@@ -165,7 +165,7 @@ def open_training_data(training_data):
             
     return x_values, y_values
 
-def squared_error(sexp, y):
+def squared_error(sexp, y, n, x):
     difference = y - evaluate(sexp)
     return difference ** 2
 
@@ -176,7 +176,7 @@ def calculate_fitness(e, n, m, training_data):
     for i in range(0, m-1):
         x = x_values[i]
         y = y_values[i]
-        total += squared_error(e)
+        total += squared_error(e, y, n, x)
             
         print(factor * total)
 
