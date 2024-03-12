@@ -1,4 +1,4 @@
-import signal # timer
+import threading # timer
 import random
 import sexpdata as sex
 from treelib import Tree
@@ -135,7 +135,7 @@ def reproduction(population: list, offspring: list, offspring_size: int):
     population[-offspring_size:] = offspring
     return population
 
-def ga(population_size: int, time_budget: int, tree_depth: int, crossover_n: int, offspring_size: int):
+def ga(population_size: int, tree_depth: int, crossover_n: int, offspring_size: int):
 
     population = generate_population(population_size, tree_depth)
     
@@ -151,6 +151,13 @@ def ga(population_size: int, time_budget: int, tree_depth: int, crossover_n: int
         population = reproduction(population, offspring, offspring_size)
         if calculate_fitness(population[0]) == 1 : return population[0]
     #return population[0] # at this time the list will be sorted as reproduction has just occurred, which sorts the list
+
+def genetic_algorithm(time_budget: int, population_size: int,  tree_depth: int, crossover_n: int, offspring_size: int):
+    def wrapper():
+        print(ga(population_size, tree_depth, crossover_n, offspring_size))
+        
+    timer = threading.Timer(time_budget, wrapper)
+    timer.start
 
 print(SAMPLE_EXP_3)
 print(mutation(SAMPLE_EXP_3, 3))
