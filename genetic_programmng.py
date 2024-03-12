@@ -1,11 +1,11 @@
-import threading # timer
+import time
 import random
 import sexpdata as sex
 from treelib import Tree
 from s_expressions import evaluate
 
 function_nodes = [('add', 2),('sub', 2),('mul', 2),('div', 2),('pow', 2),('sqrt', 1),('log', 1),('exp', 1),('max', 2),('ifleq', 4),('data', 1),('diff', 2),('avg', 2)]
-function_nodes = [('add', 2),('sub', 2),('mul', 2),('div', 2),('pow', 2),('sqrt', 1),('log', 1),('exp', 1),('max', 2),('ifleq', 4)] #,('data', 1),('diff', 2),('avg', 2)]
+#function_nodes = [('add', 2),('sub', 2),('mul', 2),('div', 2),('pow', 2),('sqrt', 1),('log', 1),('exp', 1),('max', 2),('ifleq', 4)] #,('data', 1),('diff', 2),('avg', 2)]
 #function_nodes = [('add', 2),('sub', 2),('mul', 2),('div', 2),('sqrt', 1),('log', 1),('max', 2),('ifleq', 4)] #,('data', 1),('diff', 2),('avg', 2)]
 
 
@@ -16,11 +16,14 @@ SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
 # Branch swap - swap 2 branches from parents
 def branch_swap_crossover(parent1: str, parent2: str, tree_depth: int, min_depth: int):
     branch_depth = random.randint(min_depth, tree_depth) # from 1 to avoid replacing whole tree
-    branch1 , branch2 = get_branch_at_depth(parent1, branch_depth), get_branch_at_depth(parent2, branch_depth) # select 2 random branches
+    branch = get_branch_at_depth(parent2, branch_depth) # select 2 random branches
     #swap branches
-    parent1 = parent1.replace(branch1, branch2, 1) 
-    parent2 = parent2.replace(branch2, branch1, 1)
-    return parent1, parent2
+
+    try:
+        parent1 = parent1.replace(get_branch_at_depth(parent1, branch_depth), branch, 1) 
+    except AttributeError:
+        print("wrongAttribute in crossover")
+    return parent1
 
 # Performs the branch swap crossover for a list of parents
 def crossover(parents: list, tree_depth: int, min_depth: int, offspring_size: int):
@@ -29,8 +32,8 @@ def crossover(parents: list, tree_depth: int, min_depth: int, offspring_size: in
     for _ in range(offspring_size):
         parent1 = parents[random.randint(0,offspring_size-1)]
         parent2 = parents[random.randint(0,offspring_size-1)]
-        
         offspring.append(branch_swap_crossover(parent1, parent2, tree_depth, min_depth))
+
     return offspring
 
 # Branch replacement - Pick a random branch, replace with newly generated branch of same depth
@@ -38,7 +41,10 @@ def branch_replacement_mutation(parent: str, treedepth: int) -> str:
     branch_depth = random.randint(1, treedepth-1)
     branch = get_branch_at_depth(parent, branch_depth)
     replacement = full_generation(treedepth - branch_depth)
-    return parent.replace(branch, replacement , 1)
+    try:
+        return parent.replace(branch, replacement , 1)
+    except AttributeError:
+        print("wrongAttribute in mutation")
 
 # Performs mutation on the parents with a given probability
 def mutation(parents: list, treedepth: int, mutation_rate: float) -> list:
@@ -132,35 +138,42 @@ def calculate_fitnesses(population: list) -> list:
 # Replaces less fit individuals in the current population with the offspring
 def reproduction(population: list, offspring: list, offspring_size: int):
     population = sorted(population, key=lambda x : calculate_fitness(x))
+    print(len(population))
+    print(offspring_size, len(offspring))
     population[-offspring_size:] = offspring
+    print(len(population))
     return population
 
-def ga(population_size: int, tree_depth: int, crossover_n: int, offspring_size: int):
+def ga(time_budget: int, population_size: int, tree_depth: int, crossover_n: int, offspring_size: int, mutation_rate: int):
 
-    population = generate_population(population_size, tree_depth)
+    start_time = time.time()
+    elapsed_time = 0
     
-    while True:
+    population = generate_population(population_size, tree_depth)
+    counter = 0
+    while counter < 1:#elapsed_time<time_budget:
         # Selection
         parents = tournament_selection(population, crossover_n, offspring_size, population_size)
         # Variation
-        parents = mutation(parents)
-        offspring = crossover(parents)
-        # Fitness Calculation
-        # Fitnesses are not maintained, but calculated when required
-        # Reproduction
-        population = reproduction(population, offspring, offspring_size)
-        if calculate_fitness(population[0]) == 1 : return population[0]
-    #return population[0] # at this time the list will be sorted as reproduction has just occurred, which sorts the list
-
-def genetic_algorithm(time_budget: int, population_size: int,  tree_depth: int, crossover_n: int, offspring_size: int):
-    def wrapper():
-        print(ga(population_size, tree_depth, crossover_n, offspring_size))
+        parents = mutation(parents, tree_depth, mutation_rate)
         
-    timer = threading.Timer(time_budget, wrapper)
-    timer.start
+        offspring = crossover(parents, tree_depth, 2, offspring_size)
+            # Fitness Calculation
+            # Fitnesses are not maintained, but calculated when required
+        # Reproduction
+        
+        population = reproduction(population, offspring, offspring_size)
+        elapsed_time = time.time() - start_time
+        counter +=1
+    #for p in population:
+        #print("--------------")
+        #print(p)
+    return population[0]
+    #return population[0] # at this time the list will be sorted as reproduction has just occurred, which sorts the list
+ga(0.01,10,4,2,3,0.2)
 
-print(SAMPLE_EXP_3)
-print(mutation(SAMPLE_EXP_3, 3))
-print(mutation(SAMPLE_EXP_3, 3))
+# print(SAMPLE_EXP_3)
+# print(mutation(SAMPLE_EXP_3, 3))
+# print(mutation(SAMPLE_EXP_3, 3))
             
 #ga(1,1,3)
