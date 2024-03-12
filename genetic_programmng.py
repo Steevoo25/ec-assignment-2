@@ -17,13 +17,12 @@ SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
 def crossover(parent1: str, parent2: str, branch_index: int) -> str:
     return 1
 
-# Branch replacement - Pick a random branch, replace with newly generated branch
+# Branch replacement - Pick a random branch, replace with newly generated branch of same depth
 def mutation(parent: str, treedepth: int) -> str:
-    mutated = parent
     branch_depth = random.randint(1, treedepth-1)
-    branch = get_branch_at_depth(mutated, branch_depth)
+    branch = get_branch_at_depth(parent, branch_depth)
     replacement = full_generation(treedepth - branch_depth)
-    return mutated.replace(branch, replacement , 1)
+    return parent.replace(branch, replacement , 1)
 
 # Returns a random branch at a given depth
 def get_branch_at_depth(exp: str, depth: int) -> str:
@@ -41,7 +40,7 @@ def get_branch_at_depth(exp: str, depth: int) -> str:
                 temp_exp = find_balanced_expression(exp[i:])
                 
     return temp_exp
-    
+# Returns a list of all sub-expressions at the uppermost level    
 def find_balanced_expression(exp) -> str:
     # monitor number of l and r brackets
     l_brac, r_brac = 0, 0
@@ -65,13 +64,18 @@ def find_balanced_expression(exp) -> str:
     
     return random.choice(expressions)
 
+def tournament_selection(population: list, n: int, offspring_size: int, population_size: int) -> list:
 
-def tournament_selection(population: list, fitnesses: list, n: int, offspring_size: int) -> list:
-    # for offspring_size times
-        # pick n random solutions from population
-        # copy one with highest fitness into offspring
+    offspring = []
+    for _ in range(offspring_size):
+        tournament = []
+        for _ in range(n):
+            tournament.append(population[random.randint(0,population_size-1)])
+        tournament = sorted(tournament, key=lambda x: calculate_fitness(x))
+        # parent with lowest mse
+        offspring.append(tournament[0])
     
-    return 1
+    return offspring
 
 # Generates a single member of population using full generation
 def full_generation(tree_depth) -> str:
@@ -119,6 +123,8 @@ def ga(population_size: int, time_budget: int, tree_depth: int ):
         time_elapsed +=1
     return 1
 
-mutation(SAMPLE_EXP_3, 3)
+print(SAMPLE_EXP_3)
+print(mutation(SAMPLE_EXP_3, 3))
+print(mutation(SAMPLE_EXP_3, 3))
             
 #ga(1,1,3)
