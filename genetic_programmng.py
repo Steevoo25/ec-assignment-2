@@ -14,22 +14,19 @@ SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
 
 # Branch swap - swap 2 branches from parents
-def crossover(parent1, parent2, branch_index: int):
+def crossover(parent1: str, parent2: str, branch_index: int) -> str:
     return 1
 
 # Branch replacement - Pick a random branch, replace with newly generated branch
-def mutation(parent):
-    # a branch is a well-bracketed string
-    # get a random element
-    mutated = parent[random.randint(0,len(parent)):]
-    
-    print(mutated)
-    # select random branch and delete it
-    # generate new branch and add it where branch was deleted from
-    return mutated
+def mutation(parent: str, treedepth: int) -> str:
+    mutated = parent
+    branch_depth = random.randint(1, treedepth-1)
+    branch = get_branch_at_depth(mutated, branch_depth)
+    replacement = full_generation(treedepth - branch_depth)
+    return mutated.replace(branch, replacement , 1)
 
 # Returns a random branch at a given depth
-def get_branch_at_depth(exp: str, depth: int):
+def get_branch_at_depth(exp: str, depth: int) -> str:
     # remove leading and trailing ()
     exp = exp[1:-1]
     temp_exp = exp
@@ -45,7 +42,7 @@ def get_branch_at_depth(exp: str, depth: int):
                 
     return temp_exp
     
-def find_balanced_expression(exp):
+def find_balanced_expression(exp) -> str:
     # monitor number of l and r brackets
     l_brac, r_brac = 0, 0
     start = 0
@@ -69,7 +66,7 @@ def find_balanced_expression(exp):
     return random.choice(expressions)
 
 
-def tournament_selection(population: list, fitnesses: list, n: int, offspring_size: int):
+def tournament_selection(population: list, fitnesses: list, n: int, offspring_size: int) -> list:
     # for offspring_size times
         # pick n random solutions from population
         # copy one with highest fitness into offspring
@@ -94,10 +91,10 @@ def generate_population(population_size: int, tree_depth: int) -> list:
         population.append(full_generation(tree_depth))
     return population
 
-def calculate_fitness(solution):
+def calculate_fitness(solution: str) -> float:
     return 1
     
-def calclulate_fitnesses(population: list):
+def calclulate_fitnesses(population: list) -> list:
     fitnesses = []
     for solution in population:
         fitnesses.append(calculate_fitness(solution))
@@ -122,6 +119,6 @@ def ga(population_size: int, time_budget: int, tree_depth: int ):
         time_elapsed +=1
     return 1
 
-
+mutation(SAMPLE_EXP_3, 3)
             
 #ga(1,1,3)
