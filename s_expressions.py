@@ -12,13 +12,14 @@ import random
 SAMPLE_EXP_1 = "(mul (add 1 2) (log 8))"
 SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
+SAMPLE_GA_PARAMS = [4, 2, 4, 0.1]
 
 FUNCTION_NODES = [('add', 2),('sub', 2),('mul', 2),('div', 2),('pow', 2),('sqrt', 1),('log', 1),('exp', 1),('max', 2),('ifleq', 4),('data', 1),('diff', 2),('avg', 2)]
+MIN_CROSSOVER_DEPTH = 2
 
 # ------------
 # QUESTION 1
 # ------------
-
 # adds 2 expressions
 def add(exp1, exp2, n, x):
     return float(evaluate(exp1, n, x)) + float(evaluate(exp2, n, x))
@@ -187,7 +188,7 @@ def squared_error(sexp, y, n, x):
     difference = y - evaluate(sexp, n, x)
     return difference ** 2
 
-# Calculated the mean squared error of an expression 
+# Calculated the mean squared error of an s-expression e 
 def calculate_fitness(e, n, m, training_data):
     x_values, y_values = open_training_data(training_data)
     total = 0
@@ -202,8 +203,6 @@ def calculate_fitness(e, n, m, training_data):
 # ------------
 # QUESTION 3
 # ------------
-
-
 
 # Branch swap - swap 2 branches from parents
 def branch_swap_crossover(parent1: str, parent2: str, tree_depth: int, min_depth: int):
@@ -235,7 +234,6 @@ def branch_replacement_mutation(parent: str, treedepth: int) -> str:
     replacement = full_generation(treedepth - branch_depth)
     new =  parent.replace(branch, replacement , 1)
     return new
-
 
 # Performs mutation on the parents with a given probability
 def mutation(parents: list, treedepth: int, mutation_rate: float) -> list:
@@ -292,14 +290,14 @@ def find_balanced_expression(exp: str) -> str:
     return random.choice(expressions)
 
 # Performs tournamnt selection on a population
-def tournament_selection(population: list, n: int, offspring_size: int, population_size: int) -> list:
+def tournament_selection(population: list, tournament_n: int, offspring_size: int, population_size: int, n, m, training_data) -> list:
 
     offspring = []
     for i in range(offspring_size):
         tournament = []
-        for j in range(n):
+        for j in range(tournament_n):
             tournament.append(population[random.randint(0,population_size-1)])
-        tournament = sorted(tournament, key=lambda x: calculate_fitness(x))
+        tournament = sorted(tournament, key=lambda x: calculate_genetic_fitness(x, n, m, training_data))
         # parent with lowest mse
         offspring.append(tournament[0])
     
@@ -312,7 +310,7 @@ def full_generation(tree_depth: int) -> str:
         return f"{random.randint(1, 10)}"
     else:
         # Choose a random function node with its children
-        node_name, num_children = random.choice(function_nodes)
+        node_name, num_children = random.choice(FUNCTION_NODES)
         children = ' '.join(full_generation(tree_depth - 1) for _ in range(num_children))
         return f"({node_name} {children})"
 
@@ -324,40 +322,46 @@ def generate_population(population_size: int, tree_depth: int) -> list:
     return population
 
 # Replaces less fit individuals in the current population with the offspring
-def reproduction(population: list, offspring: list, offspring_size: int):
-    population = sorted(population, key=lambda x : calculate_fitness(x))
+def reproduction(population: list, offspring: list, offspring_size: int,n: int, m: int, training_data:str ):
+    population = sorted(population, key=lambda x : calculate_genetic_fitness(x, n, m, training_data ))
     population[-offspring_size:] = offspring
     return population
 
+# Calculate fitness for a string e
+def calculate_genetic_fitness(e:str,n: int, m: int, training_data:str):
+    e = sex.loads(e)
+    return calculate_fitness(e, n, m, training_data)
+
 def ga(params: list, inputs:list):
-    tree_depth, crossover_n, offspring_size, mutation_rate = params
+    # unpack parameters
+    tree_depth, tournament_n, offspring_size, mutation_rate = params
+    population_size, n, m, training_data, time_budget = inputs
     
+    # generate initial population
+    population = generate_population(population_size, tree_depth)
+    
+    # initialise timer
     start_time = time.time()
     elapsed_time = 0
-    population_size, n, m, training_data, time_budget = inputs
-    population = generate_population(population_size, tree_depth)
     
     while elapsed_time < time_budget:
         # Selection
-        parents = tournament_selection(population, crossover_n, offspring_size, population_size)
+        parents = tournament_selection(population, tournament_n, offspring_size, population_size)
         # Variation
         parents = mutation(parents, tree_depth, mutation_rate)
-        
-        offspring = crossover(parents, tree_depth, 2, offspring_size)
+        offspring = crossover(parents, tree_depth, MIN_CROSSOVER_DEPTH, offspring_size)
             # Fitness Calculation
             # Fitnesses are not maintained, but calculated when required
         # Reproduction
         population = reproduction(population, offspring, offspring_size)
         elapsed_time = time.time() - start_time
-    
-    print(elapsed_time)
 
-    print(len(population))
-    return population[0]
+    return sorted(population, key = lambda x: calculate_genetic_fitness(x, n, m, training_data, ))
 
 # ------------
 # PROGRAM FLOW
 # ------------
+
 # Processes various arguments
 def get_args(args) -> list:
     # Access the arguments
@@ -374,7 +378,7 @@ def get_args(args) -> list:
     time_budget = getattr(args, 'time_budget', None)
     return question, expr, n, x, m, data, pop_size, time_budget
 
-#
+# Executes correspoding functionality for each question
 def select_question(args):
     
     # Extract arguments
@@ -386,7 +390,7 @@ def select_question(args):
         n = int(n)
         x = [float(num) for num in x.split(' ')]
         result = evaluate(e)
-        print(result)
+
     if q == 2:
         # cast arguments
         e = sex.loads(e)
@@ -397,7 +401,12 @@ def select_question(args):
     if q == 3:
         pop_size = int(pop_size)
         time_budget = float(time_budget)
-        result = ga()
+        params = []
+        inputs = [pop_size, n, m, training_data, time_budget]
+        result = ga(params=params, inputs=inputs)
+        result = ga(params=SAMPLE_GA_PARAMS, inputs=inputs)
+        
+    print(result)
 
 def main():
     # Create ArgumentParser object
@@ -422,6 +431,4 @@ def main():
     return 
 
 if __name__ == "__main__":
-    print(evaluate(sex.loads(SAMPLE_EXP_1), 1, 1))
-    print(evaluate(sex.loads(SAMPLE_EXP_2), 2, [1,2]))
     main()
