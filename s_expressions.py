@@ -153,7 +153,7 @@ def evaluate(sexp):
             print("Value too large for operation: ", operator, operands, " returning 0 for this step")
             return 0
 
-def open_training_data():
+def open_training_data(training_data):
     x_values = []
     y_values = []
     # open file
@@ -170,50 +170,38 @@ def squared_error(sexp):
     difference = y - evaluate(sexp)
     return difference ** 2
 
-def calculate_fitness():
-    return 1
+def calculate_fitness(e, n, m, training_data):
+    x_values, y_values = open_training_data(training_data)
+    total = 0
+    factor = 1/m
+    for i in range(0, m-1): # as x is global, update here
+        x = x_values[i]
+        y = y_values[i]
+        total += squared_error(e)
+            
+        print(factor * total)
 
-def main():
-    # Create ArgumentParser object
-    parser = argparse.ArgumentParser(description='Example script to demonstrate argparse')
-
-    # Add arguments
-    parser.add_argument('--question', help='question number')
-    parser.add_argument('--expr', help='an expression')
-    parser.add_argument('-n', help='dimension of unput vector n')
-    parser.add_argument('-x', help='input vector')
-    
-    parser.add_argument('-m', help='Size of training data')
-    parser.add_argument('-data', help='filename containing training data')
-    
-    parser.add_argument('--lambda', help='Population Size')
-    parser.add_argument('--time_budget', help='number of seconds to run algorithm')
-    
-    # Parse the command line arguments
-    args = parser.parse_args()
-
+def get_args(args) -> list:
     # Access the arguments
-    question = args.question
-    expr = args.expr
-    n = args.n
-    x = args.x
-    
-    m = args.m
-    data = args.data
-    
+    # q1+
+    question = getattr(args, 'question', None)
+    expr = getattr(args, 'expr', None)
+    n = getattr(args, 'n', None)
+    x = getattr(args, 'x', None)
+    # q2+
+    m = getattr(args, 'm', None)
+    data = getattr(args, 'data', None)
+    # q3+
     pop_size = getattr(args, 'lambda', None)
-    time_budget = args.time_budget
-    
-    return question, expr, n , x, m, data, pop_size, time_budget
+    time_budget = getattr(args, 'time_budget', None)
+    return question, expr, n, x, m, data, pop_size, time_budget
 
-if __name__ == "__main__":
-    q, e, n, x, m, train_data, pop_size, time_budget  = main()
-    # Cast arguments to correct type
-    q = int(q)
+
+def select_question(args):
     
-    
-    
-    training_data = train_data # Split training data
+    # Extract arguments
+    q, e, n, x, m, training_data, pop_size, time_budget  = get_args(args)
+
     if q == 1:
         # cast arguments
         e = sex.loads(e)
@@ -226,18 +214,36 @@ if __name__ == "__main__":
         e = sex.loads(e)
         n = int(n)
         m = int(m)
+        result = calculate_fitness(e, n, m, training_data)
         
-        x_values, y_values = open_training_data()
-        total = 0
-        factor = 1/m
-        for i in range(0, m-1): # as x is global, update here
-            x = x_values[i]
-            y = y_values[i]
-            total += squared_error(e)
-            
-        print(factor * total)
     if q == 3:
         pop_size = int(pop_size)
         time_budget = float(time_budget)
-        
-        ga()
+        result = ga()
+    
+
+
+def main():
+    # Create ArgumentParser object
+    parser = argparse.ArgumentParser(description='Example script to demonstrate argparse')
+
+    # Add arguments
+    parser.add_argument('-question', help='question number')
+    parser.add_argument('-expr', help='an expression')
+    parser.add_argument('-n', help='dimension of unput vector n')
+    parser.add_argument('-x', help='input vector')
+    
+    parser.add_argument('-m', help='Size of training data')
+    parser.add_argument('-data', help='filename containing training data')
+    
+    parser.add_argument('-lambda', help='Population Size')
+    parser.add_argument('-time_budget', help='number of seconds to run algorithm')
+    
+    # Parse the command line arguments
+    args = parser.parse_args()
+    select_question(args)
+    
+    return 
+
+if __name__ == "__main__":
+    main()
