@@ -23,12 +23,19 @@ def crossover(parent1: str, parent2: str, tree_depth: int, min_depth: int):
     return parent1, parent2
 
 # Branch replacement - Pick a random branch, replace with newly generated branch of same depth
-def mutation(parent: str, treedepth: int) -> str:
+def branch_replacement_mutation(parent: str, treedepth: int) -> str:
     branch_depth = random.randint(1, treedepth-1)
     branch = get_branch_at_depth(parent, branch_depth)
     replacement = full_generation(treedepth - branch_depth)
     return parent.replace(branch, replacement , 1)
 
+# Performs mutation on the parents with a given probability
+def mutation(parents: list, treedepth: int, mutation_rate: float) -> list:
+    for parent in parents:
+        if random.uniform(0,1) < mutation_rate:
+            parent = branch_replacement_mutation(parent, treedepth)
+    return parents
+    
 # Returns a random branch at a given depth
 def get_branch_at_depth(exp: str, depth: int) -> str:
     # remove leading and trailing ()
@@ -109,7 +116,7 @@ def calclulate_fitnesses(population: list) -> list:
         fitnesses.append(calculate_fitness(solution))
     return fitnesses
 
-def ga(population_size: int, time_budget: int, tree_depth: int ):
+def ga(population_size: int, time_budget: int, tree_depth: int, crossover_n: int, offspring_size: int):
     time_elapsed = 0
     population = generate_population(population_size, tree_depth)
     
@@ -121,8 +128,10 @@ def ga(population_size: int, time_budget: int, tree_depth: int ):
     
     while time_elapsed < time_budget:
         # Selection
+        parents = tournament_selection(population, crossover_n, offspring_size, population_size)
         # Variation
-        offspring = mutation(population)
+        parents = mutation(parents)
+        
         # Fitness Calculation
         # Reproduction
         time_elapsed +=1
