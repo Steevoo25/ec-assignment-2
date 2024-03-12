@@ -8,55 +8,55 @@ SAMPLE_EXP_1 = "(mul (add 1 2) (log 8))"
 SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 
 # adds 2 expressions
-def add(exp1, exp2):
-    return float(evaluate(exp1)) + float(evaluate(exp2))
+def add(exp1, exp2, n, x):
+    return float(evaluate(exp1, n, x)) + float(evaluate(exp2, n, x))
 
 # Subtracts exp2 from exp1
-def sub (exp1, exp2):
-    return float(evaluate(exp1)) - float(evaluate(exp2))
+def sub (exp1, exp2, n, x):
+    return float(evaluate(exp1, n, x)) - float(evaluate(exp2, n, x))
     
 # Multiplies 2 expressions
-def mul(exp1, exp2):
-    return float(evaluate(exp1)) * float(evaluate(exp2))
+def mul(exp1, exp2, n, x):
+    return float(evaluate(exp1, n, x)) * float(evaluate(exp2, n, x))
 
 # Divides exp1 by exp 2 as long as exp2 is not 0
-def div(exp1, exp2):
-    exp2_eval = float(evaluate(exp2))
-    exp1_eval = float(evaluate(exp2))
+def div(exp1, exp2, n, x):
+    exp2_eval = float(evaluate(exp2, n, x))
+    exp1_eval = float(evaluate(exp1, n, x))
     if exp2_eval == 0:
         return 0
     else:
         return exp1_eval / exp2_eval
         
 # Returns exp1 to the power of exp2
-def pow(exp1, exp2):
-    return float(evaluate(exp1)) ** float(evaluate(exp2))
+def pow(exp1, exp2, n, x):
+    return float(evaluate(exp1, n, x)) ** float(evaluate(exp2, n, x))
 
 # Returns the square root of exp1
-def sqrt(exp1):
-    exp1_eval = float(evaluate(exp1))
+def sqrt(exp1, n, x):
+    exp1_eval = float(evaluate(exp1, n, x))
     if exp1_eval < 0:
         return 0
     return math.sqrt(exp1_eval)
 
 # Takes log2 of 1 expression
-def log(exp1):
-    exp1_val = float(evaluate(exp1))
+def log(exp1, n, x):
+    exp1_val = float(evaluate(exp1, n, x))
     if exp1_val > 0:
         return math.log2(exp1_val)
     else:
         return 0
 
 # returns e^ exp1
-def exp(exp1):
-    exp1_val = float(evaluate(exp1))
+def exp(exp1, n, x):
+    exp1_val = float(evaluate(exp1, n, x))
 
     return math.e ** exp1_val
 
 #returns larger value of exp1 and exp2
-def max(exp1, exp2) -> float:
-    exp1_eval = float(evaluate(exp1))
-    exp2_eval = float(evaluate(exp2))
+def max(exp1, exp2, n, x) -> float:
+    exp1_eval = float(evaluate(exp1, n, x))
+    exp2_eval = float(evaluate(exp2, n, x))
     
     if exp1_eval > exp2_eval :
         return exp1_eval
@@ -64,34 +64,33 @@ def max(exp1, exp2) -> float:
         return exp2_eval
 
 # Returns exp3 if exp1 <= exp2, otherwise returns exp4
-def ifleq(exp1, exp2, exp3, exp4):
-    if float(evaluate(exp1)) <= float(evaluate(exp2)):
-        return evaluate(exp3)
+def ifleq(exp1, exp2, exp3, exp4, n, x):
+    if float(evaluate(exp1, n, x)) <= float(evaluate(exp2, n, x)):
+        return evaluate(exp3, n, x)
     else:
-        return evaluate(exp4)
+        return evaluate(exp4, n, x)
 
 # Returns the element at exp1th element (floored, absed and modded)
 # n is size of input vector x
-def data(exp1) -> int:
-    eval = float(evaluate(exp1))
+def data(exp1, n, x) -> int:
+    eval = float(evaluate(exp1, n, x))
     floor = math.floor(eval)
     index = np.abs(floor)
     if not index == 0:
         index = index % n 
-    print(index, x[index])
     return x[index]
 
 # Returns the difference between 2 elements
-def diff(exp1, exp2) -> int:
-    exp1_data = data(exp1)
-    exp2_data = data(exp2)
+def diff(exp1, exp2, n, x) -> int:
+    exp1_data = data(exp1, n, x)
+    exp2_data = data(exp2, n, x)
     return exp1_data - exp2_data
 
 # Returns the average of a range between 2 indecies
-def avg(exp1, exp2):
+def avg(exp1, exp2, n, x):
 
-    k = np.abs(math.floor(evaluate(exp1))) % n
-    l = np.abs(math.floor(evaluate(exp2))) % n
+    k = np.abs(math.floor(evaluate(exp1, n, x))) % n
+    l = np.abs(math.floor(evaluate(exp2, n, x))) % n
     print("k , l" , k , l)
     if k == l:
         return 0
@@ -109,7 +108,7 @@ def avg(exp1, exp2):
             
     return float(factor * sum)
 
-def evaluate(sexp):
+def evaluate(sexp, n: int, x: float):
     # if its an atom
     if isinstance(sexp, int):
         return sexp
@@ -124,31 +123,31 @@ def evaluate(sexp):
         #print("operator", operator,"operands",  operands)
         try:
             if operator == 'add':
-                return add(*operands)
+                return add(*operands, n, x)
             elif operator == 'sub':
-                return sub(*operands)
+                return sub(*operands, n, x)
             elif operator == 'mul':
-                return mul(*operands)
+                return mul(*operands, n, x)
             elif operator == 'div':
-                return div(*operands)
+                return div(*operands, n, x)
             elif operator == 'pow':
-                return pow(*operands)
+                return pow(*operands, n, x)
             elif operator == 'sqrt':
-                return sqrt(*operands)
+                return sqrt(*operands, n, x)
             elif operator == 'log':
-                return log(*operands)
+                return log(*operands, n, x)
             elif operator == 'exp':
-                return exp(*operands)
+                return exp(*operands, n, x)
             elif operator == 'max':
-                return max(*operands)           
+                return max(*operands, n, x)           
             elif operator == 'ifleq':
-                return ifleq(*operands)
+                return ifleq(*operands, n, x)
             elif operator == 'data':
-                return data(*operands)
+                return data(*operands, n, x)
             elif operator == 'diff':
-                return diff(*operands)
+                return diff(*operands, n, x)
             elif operator == 'avg':
-                return avg(*operands)
+                return avg(*operands, n, x)
         except OverflowError:
             print("Value too large for operation: ", operator, operands, " returning 0 for this step")
             return 0
@@ -166,7 +165,7 @@ def open_training_data(training_data):
             
     return x_values, y_values
 
-def squared_error(sexp):
+def squared_error(sexp, y):
     difference = y - evaluate(sexp)
     return difference ** 2
 
@@ -174,7 +173,7 @@ def calculate_fitness(e, n, m, training_data):
     x_values, y_values = open_training_data(training_data)
     total = 0
     factor = 1/m
-    for i in range(0, m-1): # as x is global, update here
+    for i in range(0, m-1):
         x = x_values[i]
         y = y_values[i]
         total += squared_error(e)
@@ -195,7 +194,6 @@ def get_args(args) -> list:
     pop_size = getattr(args, 'lambda', None)
     time_budget = getattr(args, 'time_budget', None)
     return question, expr, n, x, m, data, pop_size, time_budget
-
 
 def select_question(args):
     
@@ -220,8 +218,6 @@ def select_question(args):
         pop_size = int(pop_size)
         time_budget = float(time_budget)
         result = ga()
-    
-
 
 def main():
     # Create ArgumentParser object
@@ -246,4 +242,6 @@ def main():
     return 
 
 if __name__ == "__main__":
+    print(evaluate(sex.loads(SAMPLE_EXP_1), 1, 1))
+    print(evaluate(sex.loads(SAMPLE_EXP_2), 2, [1,2]))
     main()
