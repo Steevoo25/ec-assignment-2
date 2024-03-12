@@ -136,16 +136,10 @@ def reproduction(population: list, offspring: list, offspring_size: int):
     return population
 
 def ga(population_size: int, time_budget: int, tree_depth: int, crossover_n: int, offspring_size: int):
-    time_elapsed = 0
+
     population = generate_population(population_size, tree_depth)
     
-    for solution in population:
-        print(solution)
-        print(evaluate(sex.loads(solution)))
-        
-    fitnesses = calculate_fitnesses(population)
-    
-    while time_elapsed < time_budget:
+    while True:
         # Selection
         parents = tournament_selection(population, crossover_n, offspring_size, population_size)
         # Variation
@@ -155,9 +149,8 @@ def ga(population_size: int, time_budget: int, tree_depth: int, crossover_n: int
         # Fitnesses are not maintained, but calculated when required
         # Reproduction
         population = reproduction(population, offspring, offspring_size)
-        time_elapsed +=1
-        
-    return population[0] # at this time the list will be sorted as reproduction has just occurred, which sorts the list
+        if calculate_fitness(population[0]) == 1 : return population[0]
+    #return population[0] # at this time the list will be sorted as reproduction has just occurred, which sorts the list
 
 print(SAMPLE_EXP_3)
 print(mutation(SAMPLE_EXP_3, 3))
