@@ -22,7 +22,7 @@ def branch_swap_crossover(parent1: str, parent2: str, tree_depth: int, min_depth
     parent2 = parent2.replace(branch2, branch1, 1)
     return parent1, parent2
 
-
+# Performs the branch swap crossover for a list of parents
 def crossover(parents: list, tree_depth: int, min_depth: int, offspring_size: int):
     offspring = []
     # pick 2 parents
@@ -123,11 +123,17 @@ def generate_population(population_size: int, tree_depth: int) -> list:
 def calculate_fitness(solution: str) -> float:
     return 1
     
-def calclulate_fitnesses(population: list) -> list:
+def calculate_fitnesses(population: list) -> list:
     fitnesses = []
     for solution in population:
         fitnesses.append(calculate_fitness(solution))
     return fitnesses
+
+# Replaces less fit individuals in the current population with the offspring
+def reproduction(population: list, offspring: list, offspring_size: int):
+    population = sorted(population, key=lambda x : calculate_fitness(x))
+    population[-offspring_size:] = offspring
+    return population
 
 def ga(population_size: int, time_budget: int, tree_depth: int, crossover_n: int, offspring_size: int):
     time_elapsed = 0
@@ -137,7 +143,7 @@ def ga(population_size: int, time_budget: int, tree_depth: int, crossover_n: int
         print(solution)
         print(evaluate(sex.loads(solution)))
         
-    fitnesses = calclulate_fitnesses(population)
+    fitnesses = calculate_fitnesses(population)
     
     while time_elapsed < time_budget:
         # Selection
@@ -146,9 +152,12 @@ def ga(population_size: int, time_budget: int, tree_depth: int, crossover_n: int
         parents = mutation(parents)
         offspring = crossover(parents)
         # Fitness Calculation
+        # Fitnesses are not maintained, but calculated when required
         # Reproduction
+        population = reproduction(population, offspring, offspring_size)
         time_elapsed +=1
-    return 1
+        
+    return population[0] # at this time the list will be sorted as reproduction has just occurred, which sorts the list
 
 print(SAMPLE_EXP_3)
 print(mutation(SAMPLE_EXP_3, 3))
