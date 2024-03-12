@@ -75,7 +75,7 @@ def get_branch_at_depth(exp: str, depth: int) -> str:
     return temp_exp
 
 # Returns a list of all sub-expressions at the uppermost level    
-def find_balanced_expression(exp) -> str:
+def find_balanced_expression(exp: str) -> str:
     # monitor number of l and r brackets
     l_brac, r_brac = 0, 0
     start = 0
@@ -114,7 +114,7 @@ def tournament_selection(population: list, n: int, offspring_size: int, populati
     return offspring
 
 # Generates a single member of population using full generation
-def full_generation(tree_depth) -> str:
+def full_generation(tree_depth: int) -> str:
     if tree_depth == 0:
         # At the leaf level, generate a random function or data node
         return f"{random.randint(1, 10)}"
@@ -131,26 +131,24 @@ def generate_population(population_size: int, tree_depth: int) -> list:
         population.append(full_generation(tree_depth))
     return population
 
+# Caluclates the fitness 
 def calculate_fitness(solution: str) -> float:
-    return 1
-    
-def calculate_fitnesses(population: list) -> list:
-    fitnesses = []
-    for solution in population:
-        fitnesses.append(calculate_fitness(solution))
-    return fitnesses
+    sexp = sex.loads(solution)
+    value = evaluate(sexp)
+    return value
 
+def squared_error()
 # Replaces less fit individuals in the current population with the offspring
 def reproduction(population: list, offspring: list, offspring_size: int):
     population = sorted(population, key=lambda x : calculate_fitness(x))
     population[-offspring_size:] = offspring
     return population
 
-def ga(time_budget: int, population_size: int, tree_depth: int, crossover_n: int, offspring_size: int, mutation_rate: int):
+def ga(tree_depth: int, crossover_n: int, offspring_size: int, mutation_rate: int, inputs:list):
 
     start_time = time.time()
     elapsed_time = 0
-    
+    population_size, input_vector_n, training_data_m, filename, time_budget = inputs
     population = generate_population(population_size, tree_depth)
     
     while elapsed_time < time_budget:
@@ -167,16 +165,8 @@ def ga(time_budget: int, population_size: int, tree_depth: int, crossover_n: int
         elapsed_time = time.time() - start_time
     
     print(elapsed_time)
-    # for p in population:
-    #     print("--------------")
-    #     print(p)
+
     print(len(population))
     return population[0]
-    #return population[0] # at this time the list will be sorted as reproduction has just occurred, which sorts the list
-ga(2,1000,4,2,3,0.2)
 
-# print(SAMPLE_EXP_3)
-# print(mutation(SAMPLE_EXP_3, 3))
-# print(mutation(SAMPLE_EXP_3, 3))
-            
-#ga(1,1,3)
+ga(2,1000,4,2,3,0.2)
