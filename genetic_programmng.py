@@ -11,6 +11,7 @@ function_nodes = [('add', 2),('sub', 2),('mul', 2),('div', 2),('pow', 2),('sqrt'
 
 SAMPLE_EXP_1 = "(mul (add 1 2) (log 8))"
 SAMPLE_EXP_2 = "(max (data 0) (data 1))"
+SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
 
 # Branch swap - swap 2 branches from parents
 def crossover(parent1, parent2, branch_index: int):
@@ -26,6 +27,46 @@ def mutation(parent):
     # select random branch and delete it
     # generate new branch and add it where branch was deleted from
     return mutated
+
+# Returns a random branch at a given depth
+def get_branch_at_depth(exp: str, depth: int):
+    # remove leading and trailing ()
+    exp = exp[1:-1]
+    temp_exp = exp
+    current_depth = 0
+    for i, char in enumerate(exp):
+        if current_depth == depth:
+            return temp_exp
+            
+        else:
+            if char == '(':
+                current_depth +=1
+                temp_exp = find_balanced_expression(exp[i:])
+                
+    return temp_exp
+    
+def find_balanced_expression(exp):
+    # monitor number of l and r brackets
+    l_brac, r_brac = 0, 0
+    start = 0
+    expressions = []
+    
+    for i, char in enumerate(exp):
+        if char == '(':
+            l_brac +=1
+            
+        if char == ')':
+            r_brac +=1
+            
+        if r_brac > l_brac: # if a close has been read before an open, ignore it
+            r_brac = 0
+            
+        if l_brac == r_brac and l_brac > 0: # If brackets are present and balanced 
+            expressions.append(exp[start:i+1].strip()) # add it to list, removing whitespace
+            start = i + 2 # check next part of list
+            l_brac, r_brac = 0,0 # reset bracket counters
+    
+    return random.choice(expressions)
 
 
 def tournament_selection(population: list, fitnesses: list, n: int, offspring_size: int):
@@ -81,28 +122,6 @@ def ga(population_size: int, time_budget: int, tree_depth: int ):
         time_elapsed +=1
     return 1
 
-def get_branch_at_depth(exp: str, depth: int):
-    # remove leading and trailing ()
-    exp = exp[1:-1]
-    current_depth = 0
-    for i, char in enumerate(exp):
-        if current_depth == depth:
-            current_depth = depth
+
             
-        else:
-            if char == '(':
-                current_depth +=1
-                exp = find_next_close_bracket(exp[i:])
-            if char == ')':
-                print("Going shallower")
-    return exp
-    
-def find_next_close_bracket(exp):
-    for i, char in enumerate(exp):
-        if char == ')':
-            return exp[:i+1]
-            
-print(get_branch_at_depth(SAMPLE_EXP_1, 1))
-print(get_branch_at_depth(SAMPLE_EXP_1, 0))
-    
 #ga(1,1,3)
