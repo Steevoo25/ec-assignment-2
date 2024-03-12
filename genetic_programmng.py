@@ -14,8 +14,13 @@ SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
 
 # Branch swap - swap 2 branches from parents
-def crossover(parent1: str, parent2: str, branch_index: int) -> str:
-    return 1
+def crossover(parent1: str, parent2: str, tree_depth: int, min_depth: int):
+    branch_depth = random.randint(min_depth, tree_depth) # from 1 to avoid replacing whole tree
+    branch1 , branch2 = get_branch_at_depth(parent1, branch_depth), get_branch_at_depth(parent2, branch_depth) # select 2 random branches
+    #swap branches
+    parent1 = parent1.replace(branch1, branch2, 1) 
+    parent2 = parent2.replace(branch2, branch1, 1)
+    return parent1, parent2
 
 # Branch replacement - Pick a random branch, replace with newly generated branch of same depth
 def mutation(parent: str, treedepth: int) -> str:
