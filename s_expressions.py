@@ -356,7 +356,7 @@ def ga(params: list, inputs:list):
         population = reproduction(population, offspring, offspring_size)
         elapsed_time = time.time() - start_time
 
-    return sorted(population, key = lambda x: calculate_genetic_fitness(x, n, m, training_data, ))
+    return sorted(population, key = lambda x: calculate_genetic_fitness(x, n, m, training_data))[0]
 
 # ------------
 # PROGRAM FLOW
