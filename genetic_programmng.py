@@ -14,13 +14,24 @@ SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
 
 # Branch swap - swap 2 branches from parents
-def crossover(parent1: str, parent2: str, tree_depth: int, min_depth: int):
+def branch_swap_crossover(parent1: str, parent2: str, tree_depth: int, min_depth: int):
     branch_depth = random.randint(min_depth, tree_depth) # from 1 to avoid replacing whole tree
     branch1 , branch2 = get_branch_at_depth(parent1, branch_depth), get_branch_at_depth(parent2, branch_depth) # select 2 random branches
     #swap branches
     parent1 = parent1.replace(branch1, branch2, 1) 
     parent2 = parent2.replace(branch2, branch1, 1)
     return parent1, parent2
+
+
+def crossover(parents: list, tree_depth: int, min_depth: int, offspring_size: int):
+    offspring = []
+    # pick 2 parents
+    for _ in range(offspring_size):
+        parent1 = parents[random.randint(0,offspring_size-1)]
+        parent2 = parents[random.randint(0,offspring_size-1)]
+        
+        offspring.append(branch_swap_crossover(parent1, parent2, tree_depth, min_depth))
+    return offspring
 
 # Branch replacement - Pick a random branch, replace with newly generated branch of same depth
 def branch_replacement_mutation(parent: str, treedepth: int) -> str:
@@ -52,6 +63,7 @@ def get_branch_at_depth(exp: str, depth: int) -> str:
                 temp_exp = find_balanced_expression(exp[i:])
                 
     return temp_exp
+
 # Returns a list of all sub-expressions at the uppermost level    
 def find_balanced_expression(exp) -> str:
     # monitor number of l and r brackets
@@ -76,6 +88,7 @@ def find_balanced_expression(exp) -> str:
     
     return random.choice(expressions)
 
+# Performs tournamnt selection on a population
 def tournament_selection(population: list, n: int, offspring_size: int, population_size: int) -> list:
 
     offspring = []
@@ -131,7 +144,7 @@ def ga(population_size: int, time_budget: int, tree_depth: int, crossover_n: int
         parents = tournament_selection(population, crossover_n, offspring_size, population_size)
         # Variation
         parents = mutation(parents)
-        
+        offspring = crossover(parents)
         # Fitness Calculation
         # Reproduction
         time_elapsed +=1
