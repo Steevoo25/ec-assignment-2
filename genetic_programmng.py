@@ -41,16 +41,20 @@ def branch_replacement_mutation(parent: str, treedepth: int) -> str:
     branch_depth = random.randint(1, treedepth-1)
     branch = get_branch_at_depth(parent, branch_depth)
     replacement = full_generation(treedepth - branch_depth)
-    try:
-        return parent.replace(branch, replacement , 1)
-    except AttributeError:
-        print("wrongAttribute in mutation")
+    new =  parent.replace(branch, replacement , 1)
+    return new
+
 
 # Performs mutation on the parents with a given probability
 def mutation(parents: list, treedepth: int, mutation_rate: float) -> list:
     for parent in parents:
         if random.uniform(0,1) < mutation_rate:
             parent = branch_replacement_mutation(parent, treedepth)
+            try:
+                if ')(' in parent:
+                    parent = parent.replace(')(', ') (')
+            except TypeError:
+                print("fortnite")
     return parents
     
 # Returns a random branch at a given depth
@@ -91,16 +95,17 @@ def find_balanced_expression(exp) -> str:
             expressions.append(exp[start:i+1].strip()) # add it to list, removing whitespace
             start = i + 2 # check next part of list
             l_brac, r_brac = 0,0 # reset bracket counters
-    
+    if expressions == []:
+        print("No expressions found")
     return random.choice(expressions)
 
 # Performs tournamnt selection on a population
 def tournament_selection(population: list, n: int, offspring_size: int, population_size: int) -> list:
 
     offspring = []
-    for _ in range(offspring_size):
+    for i in range(offspring_size):
         tournament = []
-        for _ in range(n):
+        for j in range(n):
             tournament.append(population[random.randint(0,population_size-1)])
         tournament = sorted(tournament, key=lambda x: calculate_fitness(x))
         # parent with lowest mse
@@ -138,10 +143,7 @@ def calculate_fitnesses(population: list) -> list:
 # Replaces less fit individuals in the current population with the offspring
 def reproduction(population: list, offspring: list, offspring_size: int):
     population = sorted(population, key=lambda x : calculate_fitness(x))
-    print(len(population))
-    print(offspring_size, len(offspring))
     population[-offspring_size:] = offspring
-    print(len(population))
     return population
 
 def ga(time_budget: int, population_size: int, tree_depth: int, crossover_n: int, offspring_size: int, mutation_rate: int):
@@ -150,8 +152,8 @@ def ga(time_budget: int, population_size: int, tree_depth: int, crossover_n: int
     elapsed_time = 0
     
     population = generate_population(population_size, tree_depth)
-    counter = 0
-    while counter < 1:#elapsed_time<time_budget:
+    
+    while elapsed_time < time_budget:
         # Selection
         parents = tournament_selection(population, crossover_n, offspring_size, population_size)
         # Variation
@@ -161,16 +163,17 @@ def ga(time_budget: int, population_size: int, tree_depth: int, crossover_n: int
             # Fitness Calculation
             # Fitnesses are not maintained, but calculated when required
         # Reproduction
-        
         population = reproduction(population, offspring, offspring_size)
         elapsed_time = time.time() - start_time
-        counter +=1
-    #for p in population:
-        #print("--------------")
-        #print(p)
+    
+    print(elapsed_time)
+    # for p in population:
+    #     print("--------------")
+    #     print(p)
+    print(len(population))
     return population[0]
     #return population[0] # at this time the list will be sorted as reproduction has just occurred, which sorts the list
-ga(0.01,10,4,2,3,0.2)
+ga(2,1000,4,2,3,0.2)
 
 # print(SAMPLE_EXP_3)
 # print(mutation(SAMPLE_EXP_3, 3))
