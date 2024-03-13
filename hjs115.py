@@ -173,13 +173,17 @@ def open_training_data(training_data):
     x_values = []
     y_values = []
     # open file
-    with open(training_data, 'r') as training_data_file:
-        for line in training_data_file: 
-            # split by tab
-            values = line.split('\t')
-            x_values.append(values[:-1])
-            y_values.append(values[-1])
-            
+    if isinstance(training_data, str):
+        with open(training_data, 'r') as training_data_file:
+            for line in training_data_file: 
+                # split by tab
+                values = line.split('\t')
+                #x_values.append([float(x) for x in training_data[:-1]])
+                #y_values.append(float(values[-1]))
+    else:
+        x_values = [float(x) for x in training_data[:-1]]
+        y_values = float(training_data[-1])
+
     return x_values, y_values
 
 # Calculates the squared error between the evaulation of a s-expression and the output value y
@@ -288,14 +292,14 @@ def find_balanced_expression(exp: str) -> str:
     return random.choice(expressions)
 
 # Performs tournamnt selection on a population
-def tournament_selection(population: list, tournament_n: int, offspring_size: int, population_size: int, n, m, training_data) -> list:
+def tournament_selection(population: list, tournament_n: int, offspring_size: int, population_size: int, n, m, training_x, training_y) -> list:
 
     offspring = []
     for i in range(offspring_size):
         tournament = []
         for j in range(tournament_n):
             tournament.append(population[random.randint(0,population_size-1)])
-        tournament = sorted(tournament, key=lambda x: calculate_genetic_fitness(x, n, m, training_data))
+        tournament = sorted(tournament, key=lambda x: calculate_genetic_fitness(x, n, m, training_x, training_y))
         # parent with lowest mse
         offspring.append(tournament[0])
     
@@ -328,13 +332,12 @@ def reproduction(population: list, offspring: list, offspring_size: int,n: int, 
 # Calculate fitness for a string e
 def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y: float):
     e = sex.loads(e)
-        
     return calculate_fitness(e, n, m,  training_x, training_y)
 
 def ga(params: list, inputs:list):
     # unpack parameters
     tree_depth, tournament_n, offspring_size, mutation_rate = params
-    population_size, n, m, training_data, time_budget = inputs
+    population_size, n, m, training_x, training_y, time_budget = inputs
     
     # generate initial population
     population = generate_population(population_size, tree_depth)
@@ -345,7 +348,7 @@ def ga(params: list, inputs:list):
     
     while elapsed_time < time_budget:
         # Selection
-        parents = tournament_selection(population, tournament_n, offspring_size, population_size)
+        parents = tournament_selection(population, tournament_n, offspring_size, population_size, n, m, training_x, training_y)
         # Variation
         parents = mutation(parents, tree_depth, mutation_rate)
         offspring = crossover(parents, tree_depth, MIN_CROSSOVER_DEPTH, offspring_size)
@@ -355,7 +358,7 @@ def ga(params: list, inputs:list):
         population = reproduction(population, offspring, offspring_size)
         elapsed_time = time.time() - start_time
 
-    return sorted(population, key = lambda x: calculate_genetic_fitness(x, n, m, training_data))[0]
+    return sorted(population, key = lambda x: calculate_genetic_fitness(x, n, m, training_x, training_y))[0]
 
 # ------------
 # PROGRAM FLOW
@@ -383,30 +386,31 @@ def select_question(args):
     # Extract arguments
     q, e, n, x, m, training_data, pop_size, time_budget  = get_args(args)
 
-    if q == 1:
+    if q == '1':
         # cast arguments
         e = sex.loads(e)
         n = int(n)
         x = [float(num) for num in x.split(' ')]
-        result = evaluate(e)
+        result = evaluate(e, n, x)
 
-    if q == 2:
+    if q == '2':
         # cast arguments
         e = sex.loads(e)
         n = int(n)
         m = int(m)
         training_x, training_y = open_training_data(training_data) # open file
-        training_x = [float(num) for num in training_x.split(' ')]
+        #training_x = [float(num) for num in training_x.split(' ')]
         result = calculate_fitness(e, n, m, training_x, training_y)
         
-    if q == 3:
+    if q == '3':
         pop_size = int(pop_size)
+        n = int(n)
+        m = int(m)
         time_budget = float(time_budget)
         training_x, training_y = open_training_data(training_data) # open file
-        training_x = [float(num) for num in training_x.split(' ')]
+        #training_x = [float(num) for num in training_x.split(' ')]
         params = SAMPLE_GA_PARAMS # [0] = tree depth, [1] = tournament_n, [2] = offspring_size, [3] = mutation_rate
-        inputs = [pop_size, n, m, training_data, time_budget] # [0] = population_size, [1] = n, [2] = m, [3] = training_data, [4] = time_budget
-        result = ga(params=params, inputs=inputs)
+        inputs = [pop_size, n, m, training_x, training_y, time_budget] # [0] = population_size, [1] = n, [2] = m, [3] = training_data, [4] = time_budget
         result = ga(params=params, inputs=inputs)
         
     print(result)
