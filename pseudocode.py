@@ -31,6 +31,3 @@ while timer < budget:
 
 calculate fitness of each element in population
 return element with lowest fitness
-
-
-
