@@ -20,19 +20,19 @@ MIN_CROSSOVER_DEPTH = 2
 # QUESTION 1
 # ------------
 # adds 2 expressions
-def add(exp1, exp2, n, x):
+def add(exp1, exp2, n, x) -> float:
     return float(evaluate(exp1, n, x)) + float(evaluate(exp2, n, x))
 
 # Subtracts exp2 from exp1
-def sub (exp1, exp2, n, x):
+def sub (exp1, exp2, n, x) -> float:
     return float(evaluate(exp1, n, x)) - float(evaluate(exp2, n, x))
     
 # Multiplies 2 expressions
-def mul(exp1, exp2, n, x):
+def mul(exp1, exp2, n, x) -> float:
     return float(evaluate(exp1, n, x)) * float(evaluate(exp2, n, x))
 
 # Divides exp1 by exp 2 as long as exp2 is not 0
-def div(exp1, exp2, n, x):
+def div(exp1, exp2, n, x) -> float:
     exp2_eval = float(evaluate(exp2, n, x))
     exp1_eval = float(evaluate(exp1, n, x))
     if exp2_eval == 0:
@@ -41,18 +41,18 @@ def div(exp1, exp2, n, x):
         return exp1_eval / exp2_eval
         
 # Returns exp1 to the power of exp2
-def pow(exp1, exp2, n, x):
+def pow(exp1, exp2, n, x) -> float:
     return float(evaluate(exp1, n, x)) ** float(evaluate(exp2, n, x))
 
 # Returns the square root of exp1
-def sqrt(exp1, n, x):
+def sqrt(exp1, n, x) -> float:
     exp1_eval = float(evaluate(exp1, n, x))
     if exp1_eval < 0:
         return 0
     return math.sqrt(exp1_eval)
 
 # Takes log2 of 1 expression
-def log(exp1, n, x):
+def log(exp1, n, x) -> float:
     exp1_val = float(evaluate(exp1, n, x))
     if exp1_val > 0:
         return math.log2(exp1_val)
@@ -60,7 +60,7 @@ def log(exp1, n, x):
         return 0
 
 # returns e^ exp1
-def exp(exp1, n, x):
+def exp(exp1, n, x) -> float:
     exp1_val = float(evaluate(exp1, n, x))
 
     return math.e ** exp1_val
@@ -76,7 +76,7 @@ def max(exp1, exp2, n, x) -> float:
         return exp2_eval
 
 # Returns exp3 if exp1 <= exp2, otherwise returns exp4
-def ifleq(exp1, exp2, exp3, exp4, n, x):
+def ifleq(exp1, exp2, exp3, exp4, n, x) -> float:
     if float(evaluate(exp1, n, x)) <= float(evaluate(exp2, n, x)):
         return evaluate(exp3, n, x)
     else:
@@ -98,7 +98,7 @@ def diff(exp1, exp2, n, x) -> float:
     return exp1_data - exp2_data
 
 # Returns the average of a range between 2 indecies
-def avg(exp1, exp2, n, x):
+def avg(exp1, exp2, n, x) -> float:
 
     k = np.abs(math.floor(evaluate(exp1, n, x))) % n
     l = np.abs(math.floor(evaluate(exp2, n, x))) % n
@@ -120,16 +120,11 @@ def avg(exp1, exp2, n, x):
     return float(factor * sum)
 
 # Evaluates an s-expression with input vector x of dimension n
-def evaluate(sexp, n: int, x: float) -> float:
+def evaluate(sexp, n: int, x: list) -> float:
     # if its an atom
-    if isinstance(sexp, int):
+    if isinstance(sexp, float):
         return sexp
-    elif isinstance(sexp, sex.Symbol):
-        # Handle symbols?
-        print("its a symbol", sexp)
-        return None
     elif isinstance(sexp, list):
-    
         operator = str(sex.car(sexp))
         operands = sex.cdr(sexp)
         #print("operator", operator,"operands",  operands)
@@ -169,30 +164,25 @@ def evaluate(sexp, n: int, x: float) -> float:
 # ------------
 
 # Opens the training data file and reads the contents into the 2 respective lists
-def open_training_data(training_data):
+def open_training_data(training_data: str):
     x_values = []
     y_values = []
     # open file
-    if isinstance(training_data, str):
-        with open(training_data, 'r') as training_data_file:
-            for line in training_data_file: 
-                # split by tab
-                values = line.split('\t')
-                #x_values.append([float(x) for x in training_data[:-1]])
-                #y_values.append(float(values[-1]))
-    else:
-        x_values = [float(x) for x in training_data[:-1]]
-        y_values = float(training_data[-1])
-
+    with open(training_data, 'r') as training_data_file:
+        for line in training_data_file: 
+            # split by tab
+            values = line.split('\t')
+            x_values.append([float(x) for x in training_data[:-1]]) # x values become a list of list[float]
+            y_values.append(float(values[-1])) # y values becomes a list of float
     return x_values, y_values
 
 # Calculates the squared error between the evaulation of a s-expression and the output value y
-def squared_error(sexp, y, n, x):
+def squared_error(sexp, y: float, n: int, x: list):
     difference = y - evaluate(sexp, n, x)
     return difference ** 2
 
 # Calculated the mean squared error of an s-expression e 
-def calculate_fitness(e, n, m, training_x, training_y):
+def calculate_fitness(e, n: int, m: int, training_x:list, training_y:list):
     total = 0
     factor = 1/m
     for i in range(0, m-1):
@@ -332,8 +322,10 @@ def reproduction(population: list, offspring: list, offspring_size: int,n: int, 
 # Calculate fitness for a string e
 def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y: float):
     e = sex.loads(e)
+    # Add bloat
     return calculate_fitness(e, n, m,  training_x, training_y)
 
+# Performs genetic algorithm with parameters params and agruments inputs
 def ga(params: list, inputs:list):
     # unpack parameters
     tree_depth, tournament_n, offspring_size, mutation_rate = params
@@ -415,6 +407,7 @@ def select_question(args):
         
     print(result)
 
+#Parses arguments and runs main logic function
 def main():
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description='Example script to demonstrate argparse')
@@ -437,5 +430,6 @@ def main():
     
     return 
 
+# Entry point
 if __name__ == "__main__":
     main()
