@@ -199,23 +199,26 @@ def calculate_fitness(e, n: int, m: int, training_x:list, training_y:list):
 # Branch swap - swap 2 branches from parents
 def branch_swap_crossover(parent1: str, parent2: str, tree_depth: int, min_depth: int):
     branch_depth = random.randint(min_depth, tree_depth) # from 1 to avoid replacing whole tree
-    branch = get_branch_at_depth(parent2, branch_depth) # select 2 random branches
+    branch1 = get_branch_at_depth(parent1, branch_depth) # select 2 random branches
+    branch2 = get_branch_at_depth(parent2, branch_depth)
     #swap branches
-
     try:
-        parent1 = parent1.replace(get_branch_at_depth(parent1, branch_depth), branch, 1) 
+        parent1 = parent1.replace(get_branch_at_depth(parent1, branch_depth), branch2, 1) 
+        parent2 = parent2.replace(get_branch_at_depth(parent2, branch_depth), branch1, 1)
     except AttributeError:
         print("wrongAttribute in crossover")
-    return parent1
+    return parent1, parent2
 
 # Performs the branch swap crossover for a list of parents
 def crossover(parents: list, tree_depth: int, min_depth: int, offspring_size: int):
     offspring = []
     # pick 2 parents
-    for _ in range(offspring_size):
+    for _ in range(offspring_size//2):
         parent1 = parents[random.randint(0,offspring_size-1)]
         parent2 = parents[random.randint(0,offspring_size-1)]
-        offspring.append(branch_swap_crossover(parent1, parent2, tree_depth, min_depth))
+        new_offspring = branch_swap_crossover(parent1, parent2, tree_depth, min_depth)
+        offspring.append(new_offspring[0])
+        offspring.append(new_offspring[1])
 
     return offspring
 
