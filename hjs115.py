@@ -5,7 +5,6 @@ import numpy as np
 import time
 import random
 
-
 # ------------
 # CONSTANTS
 # ------------
@@ -189,13 +188,12 @@ def squared_error(sexp, y, n, x):
     return difference ** 2
 
 # Calculated the mean squared error of an s-expression e 
-def calculate_fitness(e, n, m, training_data):
-    x_values, y_values = open_training_data(training_data)
+def calculate_fitness(e, n, m, training_x, training_y):
     total = 0
     factor = 1/m
     for i in range(0, m-1):
-        x = x_values[i]
-        y = y_values[i]
+        x = training_x[i]
+        y = training_y[i]
         total += squared_error(e, y, n, x)
             
     return(factor * total)
@@ -328,9 +326,10 @@ def reproduction(population: list, offspring: list, offspring_size: int,n: int, 
     return population
 
 # Calculate fitness for a string e
-def calculate_genetic_fitness(e:str,n: int, m: int, training_data:str):
+def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y: float):
     e = sex.loads(e)
-    return calculate_fitness(e, n, m, training_data)
+        
+    return calculate_fitness(e, n, m,  training_x, training_y)
 
 def ga(params: list, inputs:list):
     # unpack parameters
@@ -396,15 +395,19 @@ def select_question(args):
         e = sex.loads(e)
         n = int(n)
         m = int(m)
-        result = calculate_fitness(e, n, m, training_data)
+        training_x, training_y = open_training_data(training_data) # open file
+        training_x = [float(num) for num in training_x.split(' ')]
+        result = calculate_fitness(e, n, m, training_x, training_y)
         
     if q == 3:
         pop_size = int(pop_size)
         time_budget = float(time_budget)
-        params = []
-        inputs = [pop_size, n, m, training_data, time_budget]
+        training_x, training_y = open_training_data(training_data) # open file
+        training_x = [float(num) for num in training_x.split(' ')]
+        params = SAMPLE_GA_PARAMS # [0] = tree depth, [1] = tournament_n, [2] = offspring_size, [3] = mutation_rate
+        inputs = [pop_size, n, m, training_data, time_budget] # [0] = population_size, [1] = n, [2] = m, [3] = training_data, [4] = time_budget
         result = ga(params=params, inputs=inputs)
-        result = ga(params=SAMPLE_GA_PARAMS, inputs=inputs)
+        result = ga(params=params, inputs=inputs)
         
     print(result)
 
