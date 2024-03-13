@@ -1,6 +1,6 @@
 import random
 import time
-from s_expressions import ga
+from hjs115 import ga
 import optuna
 import sexpdata as sex
 import pandas as pd
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     # Returns fitness of SA with randomly generated parameters
     def objective(trial):
         # Define parameter ranges
-
+        #time budget range = 20-60s
         # Perform SA
         _, fitness = ga()
         # Store results in df
