@@ -243,8 +243,13 @@ def branch_swap_crossover(parent1: str, parent2: str, tree_depth: int, min_depth
         branch2 = get_branch_at_depth(parent2, branch_depth)
     #swap branches
     
-    parent1 = parent1.replace(get_branch_at_depth(parent1, branch_depth)," " + branch2, 1) 
-    parent2 = parent2.replace(get_branch_at_depth(parent2, branch_depth)," " + branch1, 1)
+    parent1 = parent1.replace(get_branch_at_depth(parent1, branch_depth), branch2, 1) 
+    parent2 = parent2.replace(get_branch_at_depth(parent2, branch_depth), branch1, 1)
+    
+    if ')(' in parent1:
+        parent1 = parent1.replace(')(', ') (')
+    if ')(' in parent2:
+        parent2 = parent2.replace(')(', ') (')
     
     return parent1, parent2
 
@@ -274,6 +279,8 @@ def mutation(parents: list, treedepth: int, mutation_rate: float) -> list:
     for parent in parents:
         if random.uniform(0,1) < mutation_rate:
             parent = branch_replacement_mutation(parent, treedepth)
+            if ')(' in parent:
+                parent = parent.replace(')(', ') (')
     return parents
     
 # Returns a random branch at a given depth
@@ -290,9 +297,6 @@ def get_branch_at_depth(exp: str, depth: int) -> str:
             if char == '(':
                 current_depth +=1
                 temp_exp = find_balanced_expression(exp[i:])
-    
-    if temp_exp == []:
-        return get_branch_at_depth(exp, depth-1) # if not suitable branch is found, then look further up
     return temp_exp
 
 # Returns a list of all sub-expressions at the uppermost level    
@@ -317,7 +321,7 @@ def find_balanced_expression(exp: str) -> str:
             start = i + 2 # check next part of list
             l_brac, r_brac = 0,0 # reset bracket counters
     if expressions == []:
-        return []
+        print("No expression found")
     return random.choice(expressions)
 
 # Performs tournamnt selection on a population
@@ -418,7 +422,9 @@ def ga(params: list, inputs:list):
         population, fitnesses = reproduction(population, offspring, fitnesses, offspring_fitnesses, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
         
         elapsed_time = time.time() - start_time
-    return population[0], fitnesses[0], fitnesses[99]
+    print(population)
+    print(fitnesses)
+    return population[0], fitnesses[0]
     
 # ------------
 # PROGRAM FLOW
