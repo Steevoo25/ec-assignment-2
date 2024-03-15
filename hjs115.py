@@ -304,15 +304,15 @@ def find_balanced_expression(exp: str) -> str:
     return random.choice(expressions)
 
 # Performs tournamnt selection on a population
-def tournament_selection(population: list, tournament_n: int, offspring_size: int, population_size: int, n, m, training_x, training_y, penalty_weight) -> list:
+def tournament_selection(population: list, fitnesses: list, tournament_n: int, offspring_size: int, population_size: int, n, m, training_x, training_y, penalty_weight) -> list:
     offspring = []
     for i in range(offspring_size):
         tournament = []
         for j in range(tournament_n):
-            tournament.append(population[random.randint(0,population_size-1)])
-        tournament = sorted(tournament, key=lambda x: calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))
+            tournament.append(random.randint(0,population_size-1)) # append indexes
+        best = sorted(tournament, key=lambda x: fitnesses[x]) # sort by fitness value
         # parent with lowest mse
-        offspring.append(tournament[0])
+        offspring.append(population[0])
     
     return offspring
 
@@ -335,14 +335,22 @@ def generate_population(population_size: int, tree_depth: int) -> list:
     return population
 
 # Replaces less fit individuals in the current population with the offspring
-def reproduction(population: list, offspring: list, offspring_size: int,n: int, m: int, training_x, training_y, penalty_weight):
-    for sol in population:
-        fitness = calculate_genetic_fitness(sol, n, m, training_x, training_y, penalty_weight)
-        if isinstance(fitness, complex):
-            print(sol, fitness)
-        
-    population = sorted(population, key=lambda x : calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))
-    population[-offspring_size:] = offspring
+def reproduction(population: list, offspring: list,fitnesses: list, offspring_fitnesses:list, offspring_size: int, pop_size: int,n: int, m: int, training_x, training_y, penalty_weight):
+    ranked_fitnesses = []
+    sorted_fitnesses = sorted(fitnesses) # sort fitnesses
+    for i in range(pop_size):
+        fitness_index = fitnesses.index(sorted_fitnesses[i]) # find fitness of ith best element
+        ranking = [i,fitness_index]
+        ranked_fitnesses.append(ranking) # rank, fitness_index
+    # I have a list of (rank, fitness_index)
+    for i in range(offspring_size):
+#        print("popsize", pop_size, "index", pop_size-i-1, "rank", ranked_fitnesses[99])
+        replacement_index = ranked_fitnesses[pop_size - i - 1][1]
+        #print(replacement_index, population[replacement_index], fitnesses[replacement_index])
+        population[replacement_index] = offspring[i] #replace solution at rank i, with offspring i
+        fitnesses[replacement_index] = offspring_fitnesses[i] # replace fitnesses at i with offspring fitnesses at i
+    #population = sorted(population, key=lambda x : calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))
+    #population[-offspring_size:] = offspring
     return population
 
 # Introduces a penalty for bloat
@@ -372,21 +380,22 @@ def ga(params: list, inputs:list):
     
     # generate initial population
     population = generate_population(population_size, tree_depth)
-    
+    fitnesses = [calculate_genetic_fitness(e, n, m, training_x, training_y, penalty_weight) for e in population]
     # initialise timer
     start_time = time.time()
     elapsed_time = 0
     
     while elapsed_time < time_budget:
         # Selection
-        parents = tournament_selection(population, tournament_n, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
+        parents = tournament_selection(population,fitnesses, tournament_n, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
         # Variation
         parents = mutation(parents, tree_depth, mutation_rate)
         offspring = crossover(parents, tree_depth, MIN_CROSSOVER_DEPTH, offspring_size)
-            # Fitness Calculation
-            # Fitnesses are not maintained, but calculated when required
+        # Fitness Calculation
+        offspring_fitnesses = [calculate_genetic_fitness(e, n, m, training_x, training_y, penalty_weight) for e in offspring]
         # Reproduction
-        population = reproduction(population, offspring, offspring_size, n, m, training_x, training_y, penalty_weight)
+        population = reproduction(population, offspring, fitnesses, offspring_fitnesses, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
+        
         elapsed_time = time.time() - start_time
         print(elapsed_time)
     return sorted(population, key = lambda x: calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))[0]
