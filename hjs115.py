@@ -16,7 +16,7 @@ HIGH_FITNESS = 10_000
 #tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
 
 FUNCTION_NODES = [('add', 2),('sub', 2),('mul', 2),('div', 2),('pow', 2),('sqrt', 1),('log', 1),('exp', 1),('max', 2),('ifleq', 4),('data', 1),('diff', 2),('avg', 2)]
-MIN_CROSSOVER_DEPTH = 2
+MIN_CROSSOVER_DEPTH = 1
 
 # ------------
 # QUESTION 1
@@ -291,6 +291,8 @@ def get_branch_at_depth(exp: str, depth: int) -> str:
     current_depth = 0
     for i, char in enumerate(exp):
         if current_depth == depth:
+            if temp_exp == []:
+                return get_branch_at_depth(exp, depth-1) # if nothing has been found, look one layer up
             return temp_exp
             
         else:
@@ -317,11 +319,12 @@ def find_balanced_expression(exp: str) -> str:
             r_brac = 0
             
         if l_brac == r_brac and l_brac > 0: # If brackets are present and balanced 
-            expressions.append(exp[start:i+1].strip()) # add it to list, removing whitespace
+            expressions.append(exp[start:i+1]) # add it to list, removing whitespace
             start = i + 2 # check next part of list
             l_brac, r_brac = 0,0 # reset bracket counters
     if expressions == []:
-        print("No expression found")
+        #print("No expression found", exp)
+        return []
     return random.choice(expressions)
 
 # Performs tournamnt selection on a population
@@ -371,7 +374,7 @@ def reproduction(population: list, offspring: list,fitnesses: list, offspring_fi
         #print(replacement_index, population[replacement_index], fitnesses[replacement_index])
         population[replacement_index] = offspring[i] #replace solution at rank i, with offspring i
         fitnesses[replacement_index] = offspring_fitnesses[i] # replace fitnesses at i with offspring fitnesses at i
-        print("replacing: ",population[replacement_index], " with ", offspring[i])
+        #print("replacing: ",population[replacement_index], " with ", offspring[i])
     #population = sorted(population, key=lambda x : calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))
     #population[-offspring_size:] = offspring
     return population, fitnesses
@@ -413,13 +416,11 @@ def ga(params: list, inputs:list):
     elapsed_time = 0
     
     while elapsed_time < time_budget:
-        print("population", population)
         # Selection
         parents = tournament_selection(population, fitnesses, tournament_n, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
         # Variation
         parents = mutation(parents, tree_depth, mutation_rate)
         offspring = crossover(parents, tree_depth, MIN_CROSSOVER_DEPTH, offspring_size)
-        print("offsping", offspring)
         
         # Fitness Calculation
         offspring_fitnesses = [calculate_genetic_fitness(e, n, m, training_x, training_y, penalty_weight) for e in offspring]
@@ -427,8 +428,7 @@ def ga(params: list, inputs:list):
         population, fitnesses = reproduction(population, offspring, fitnesses, offspring_fitnesses, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
         
         elapsed_time = time.time() - start_time
-    print(population)
-    print(fitnesses)
+    
     sorted_list = sorted(list(zip(population, fitnesses)), key= lambda x : x[1])
     return sorted_list[0]
     
