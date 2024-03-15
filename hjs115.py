@@ -49,7 +49,8 @@ def sqrt(exp1, n, x) -> float:
     exp1_eval = float(evaluate(exp1, n, x))
     if exp1_eval < 0:
         return 0
-    return math.sqrt(exp1_eval)
+    else:
+        return math.sqrt(exp1_eval)
 
 # Takes log2 of 1 expression
 def log(exp1, n, x) -> float:
@@ -94,8 +95,12 @@ def data(exp1, n, x) -> float:
 
 # Returns the difference between 2 elements
 def diff(exp1, exp2, n, x) -> float:
-    exp1_data = data(exp1, n, x)
-    exp2_data = data(exp2, n, x)
+    exp1_eval = evaluate(exp1)
+    exp2_eval = evaluate(exp2)
+    
+    exp1_data = data(exp1_eval, n, x)
+    exp2_data = data(exp2_eval, n, x)
+    
     return exp1_data - exp2_data
 
 # Returns the average of a range between 2 indecies
@@ -113,7 +118,7 @@ def avg(exp1, exp2, n, x) -> float:
         for i in range(k, l+1):
             sum += data(i, n, x)
     else: # exp2 to exp1
-        for i in range(l, k):
+        for i in range(l, k + 1):
             sum += data(i, n, x)
             
     return float(factor * sum)
@@ -183,14 +188,13 @@ def open_training_data(training_data: str):
 # Calculates the squared error between the evaulation of a s-expression and the output value y
 def squared_error(sexp, y: float, n: int, x: list):
     try:
-
         difference = (y - evaluate(sexp, n, x)) ** 2
     except OverflowError:
         difference = math.inf
     return difference
 
 # Calculated the mean squared error of an s-expression e 
-def calculate_fitness(e, n: int, m: int, training_x:list, training_y:list):
+def calculate_fitness(e, n: int, m: int, training_x:list, training_y:list) -> float:
     total = 0
     factor = 1/m
     for i in range(0, m-1):
@@ -294,7 +298,11 @@ def find_balanced_expression(exp: str) -> str:
 
 # Performs tournamnt selection on a population
 def tournament_selection(population: list, tournament_n: int, offspring_size: int, population_size: int, n, m, training_x, training_y) -> list:
-
+    for sol in population:
+        fitness = calculate_genetic_fitness(sol, n, m, training_x, training_y)
+        if isinstance(fitness, complex):
+            print(fitness, type(fitness))
+            print(sol)
     offspring = []
     for i in range(offspring_size):
         tournament = []
@@ -326,6 +334,11 @@ def generate_population(population_size: int, tree_depth: int) -> list:
 
 # Replaces less fit individuals in the current population with the offspring
 def reproduction(population: list, offspring: list, offspring_size: int,n: int, m: int, training_x, training_y ):
+    for sol in population:
+        fitness = calculate_genetic_fitness(sol, n, m, training_x, training_y)
+        if isinstance(fitness, complex):
+            print(fitness, type(fitness))
+            print(sol)   
     population = sorted(population, key=lambda x : calculate_genetic_fitness(x, n, m, training_x, training_y))
     population[-offspring_size:] = offspring
     return population
@@ -338,7 +351,8 @@ def bloat_penalty() -> float:
 def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y: float):
     e = sex.loads(e)
     # Add bloat
-    return calculate_fitness(e, n, m,  training_x, training_y)
+    fitness = calculate_fitness(e, n, m,  training_x, training_y)
+    return fitness
 
 # Performs genetic algorithm with parameters params and agruments inputs
 def ga(params: list, inputs:list):
@@ -447,4 +461,7 @@ def main():
 
 # Entry point
 if __name__ == "__main__":
+    error_exp = "(pow (sub (log (mul 4 10)) (ifleq (data 10) (add 9 4) (exp 9) (pow 10 9))) (add (exp (ifleq 1 3 1 10)) (ifleq (max 3 9) (div 6 5) (div 4 8) (add 10 7))))"
+    e = sex.loads(error_exp)
+    #evaluate(e, 1,[1])
     main()
