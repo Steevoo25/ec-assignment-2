@@ -1,4 +1,4 @@
-from hjs115 import ga
+from hjs115 import ga, open_training_data
 import optuna
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -6,8 +6,10 @@ from matplotlib import pyplot as plt
 
 if __name__ == "__main__":
     # Test different parameter setting and collect the data (plot)
-    columns = ["solution", "fitness", "tree_depth", "tournament_n", "offspring_size", "mutation_rate"]
-
+    columns = ["solution", "fitness", "tree_depth", "tournament_n", "offspring_size", "mutation_rate", "penalty_weight", "population_size"]
+    
+    training_x, training_y = open_training_data()
+    
     # Initialise df columns
     df = pd.DataFrame(columns=columns)
 

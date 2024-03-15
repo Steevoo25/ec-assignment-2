@@ -11,7 +11,7 @@ import random
 SAMPLE_EXP_1 = "(mul (add 1 2) (log 8))"
 SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
-SAMPLE_GA_PARAMS = [4, 2, 4, 0.1, 4]
+SAMPLE_GA_PARAMS = [4, 2, 2, 0.1, 4]
 HIGH_FITNESS = 10_000
 #tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
 
@@ -357,6 +357,7 @@ def generate_population(population_size: int, tree_depth: int) -> list:
 
 # Replaces less fit individuals in the current population with the offspring
 def reproduction(population: list, offspring: list,fitnesses: list, offspring_fitnesses:list, offspring_size: int, pop_size: int,n: int, m: int, training_x, training_y, penalty_weight):
+    
     ranked_fitnesses = []
     sorted_fitnesses = sorted(fitnesses) # sort fitnesses
     for i in range(pop_size):
@@ -370,6 +371,7 @@ def reproduction(population: list, offspring: list,fitnesses: list, offspring_fi
         #print(replacement_index, population[replacement_index], fitnesses[replacement_index])
         population[replacement_index] = offspring[i] #replace solution at rank i, with offspring i
         fitnesses[replacement_index] = offspring_fitnesses[i] # replace fitnesses at i with offspring fitnesses at i
+        print("replacing: ",population[replacement_index], " with ", offspring[i])
     #population = sorted(population, key=lambda x : calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))
     #population[-offspring_size:] = offspring
     return population, fitnesses
@@ -411,11 +413,14 @@ def ga(params: list, inputs:list):
     elapsed_time = 0
     
     while elapsed_time < time_budget:
+        print("population", population)
         # Selection
         parents = tournament_selection(population, fitnesses, tournament_n, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
         # Variation
         parents = mutation(parents, tree_depth, mutation_rate)
         offspring = crossover(parents, tree_depth, MIN_CROSSOVER_DEPTH, offspring_size)
+        print("offsping", offspring)
+        
         # Fitness Calculation
         offspring_fitnesses = [calculate_genetic_fitness(e, n, m, training_x, training_y, penalty_weight) for e in offspring]
         # Reproduction
@@ -424,7 +429,8 @@ def ga(params: list, inputs:list):
         elapsed_time = time.time() - start_time
     print(population)
     print(fitnesses)
-    return population[0], fitnesses[0]
+    sorted_list = sorted(list(zip(population, fitnesses)), key= lambda x : x[1])
+    return sorted_list[0]
     
 # ------------
 # PROGRAM FLOW
