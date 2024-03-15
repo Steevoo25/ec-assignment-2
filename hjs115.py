@@ -43,7 +43,13 @@ def div(exp1, exp2, n, x) -> float:
         
 # Returns exp1 to the power of exp2
 def pow(exp1, exp2, n, x) -> float:
-    return float(evaluate(exp1, n, x)) ** float(evaluate(exp2, n, x))
+    
+    exp1_eval = float(evaluate(exp1, n, x))
+    exp2_eval = float(evaluate(exp2, n, x))
+    if exp1_eval == 0 and exp2_eval < 0:
+        return 0
+    else:
+        return float(evaluate(exp1, n, x)) ** float(evaluate(exp2, n, x))
 
 # Returns the square root of exp1
 def sqrt(exp1, n, x) -> float:
@@ -329,7 +335,12 @@ def generate_population(population_size: int, tree_depth: int) -> list:
     return population
 
 # Replaces less fit individuals in the current population with the offspring
-def reproduction(population: list, offspring: list, offspring_size: int,n: int, m: int, training_x, training_y, penalty_weight):   
+def reproduction(population: list, offspring: list, offspring_size: int,n: int, m: int, training_x, training_y, penalty_weight):
+    for sol in population:
+        fitness = calculate_genetic_fitness(sol, n, m, training_x, training_y, penalty_weight)
+        if isinstance(fitness, complex):
+            print(sol, fitness)
+        
     population = sorted(population, key=lambda x : calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))
     population[-offspring_size:] = offspring
     return population
@@ -342,9 +353,15 @@ def bloat_penalty(e: str, penalty_weight: float=1) -> float:
 # Calculate fitness for a string e
 def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y: float, penalty_weight: float):
     penalty = bloat_penalty(e, penalty_weight)
-    e = sex.loads(e)
+    try:
+        e = sex.loads(e)
+    except sex.ExpectClosingBracket:
+        e = e + ')'
+        calculate_genetic_fitness(e, n, m,  training_x, training_y, penalty_weight)
     # Add bloat
     fitness = calculate_fitness(e, n, m,  training_x, training_y)
+    if isinstance(fitness, complex):
+        fitness = fitness.real
     return fitness + penalty
 
 # Performs genetic algorithm with parameters params and agruments inputs
@@ -371,7 +388,7 @@ def ga(params: list, inputs:list):
         # Reproduction
         population = reproduction(population, offspring, offspring_size, n, m, training_x, training_y, penalty_weight)
         elapsed_time = time.time() - start_time
-
+        print(elapsed_time)
     return sorted(population, key = lambda x: calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))[0]
 
 # ------------
