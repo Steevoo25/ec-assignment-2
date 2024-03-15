@@ -67,6 +67,7 @@ def exp(exp1, n, x) -> float:
 
 #returns larger value of exp1 and exp2
 def max(exp1, exp2, n, x) -> float:
+    
     exp1_eval = float(evaluate(exp1, n, x))
     exp2_eval = float(evaluate(exp2, n, x))
     
@@ -158,6 +159,9 @@ def evaluate(sexp, n: int, x: list) -> float:
         except OverflowError:
             print("Value too large for operation: ", operator, operands, " returning 0 for this step")
             return 0
+        except TypeError:
+            print("Type error found:", operator, operands, type(operator), type(operands))
+            return 1
 
 # ------------
 # QUESTION 2
@@ -172,7 +176,7 @@ def open_training_data(training_data: str):
         for line in training_data_file: 
             # split by tab
             values = line.split('\t')
-            x_values.append([float(x) for x in training_data[:-1]]) # x values become a list of list[float]
+            x_values.append([float(x) for x in values[:-1]]) # x values become a list of list[float]
             y_values.append(float(values[-1])) # y values becomes a list of float
     return x_values, y_values
 
@@ -322,6 +326,10 @@ def reproduction(population: list, offspring: list, offspring_size: int,n: int, 
     population[-offspring_size:] = offspring
     return population
 
+# Introduces a penalty for bloat
+def bloat_penalty() -> float:
+    return 1
+    
 # Calculate fitness for a string e
 def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y: float):
     e = sex.loads(e)
@@ -379,13 +387,13 @@ def get_args(args) -> list:
 def select_question(args):
     
     # Extract arguments
-    q, e, n, x, m, training_data, pop_size, time_budget  = get_args(args)
+    q, e, n, x, m, training_data, pop_size, time_budget = get_args(args)
 
     if q == '1':
         # cast arguments
         e = sex.loads(e)
         n = int(n)
-        x = [float(num) for num in x.split(' ')]
+        x = [float(num) for num in x.split(' ') if not num == '']
         result = evaluate(e, n, x)
 
     if q == '2':
