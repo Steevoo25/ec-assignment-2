@@ -12,6 +12,7 @@ SAMPLE_EXP_1 = "(mul (add 1 2) (log 8))"
 SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
 SAMPLE_GA_PARAMS = [4, 2, 4, 0.1, 4]
+HIGH_FITNESS = 10_000
 #tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
 
 FUNCTION_NODES = [('add', 2),('sub', 2),('mul', 2),('div', 2),('pow', 2),('sqrt', 1),('log', 1),('exp', 1),('max', 2),('ifleq', 4),('data', 1),('diff', 2),('avg', 2)]
@@ -87,6 +88,7 @@ def max(exp1, exp2, n, x) -> float:
 # Returns exp3 if exp1 <= exp2, otherwise returns exp4
 def ifleq(exp1, exp2, exp3, exp4, n, x) -> float:
     if float(evaluate(exp1, n, x)) <= float(evaluate(exp2, n, x)):
+    
         return evaluate(exp3, n, x)
     else:
         return evaluate(exp4, n, x)
@@ -173,6 +175,8 @@ def evaluate(sexp, n: int, x: list) -> float:
             return 0
         except TypeError:
             #print("Type error found:", operator, operands, type(operator), type(operands))
+            return 0
+        except Exception:
             return 0
 
 # ------------
@@ -286,7 +290,9 @@ def get_branch_at_depth(exp: str, depth: int) -> str:
             if char == '(':
                 current_depth +=1
                 temp_exp = find_balanced_expression(exp[i:])
-                
+    
+    if temp_exp == []:
+        return get_branch_at_depth(exp, depth-1) # if not suitable branch is found, then look further up
     return temp_exp
 
 # Returns a list of all sub-expressions at the uppermost level    
@@ -311,7 +317,7 @@ def find_balanced_expression(exp: str) -> str:
             start = i + 2 # check next part of list
             l_brac, r_brac = 0,0 # reset bracket counters
     if expressions == []:
-        print("No expressions found")
+        return []
     return random.choice(expressions)
 
 # Performs tournamnt selection on a population
@@ -373,16 +379,14 @@ def bloat_penalty(e: str, penalty_weight: float=1) -> float:
 # Calculate fitness for a string e
 def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y: float, penalty_weight: float):
     penalty = bloat_penalty(e, penalty_weight)
+    fitness = 0
     try:
         e = sex.loads(e)
     except sex.ExpectClosingBracket:
-        print("expected closing", e)
-        e = e + ')'
-        #calculate_genetic_fitness(e, n, m,  training_x, training_y, penalty_weight)
+        return HIGH_FITNESS
     except sex.ExpectNothing:
-        print("expected nothng", e)
-        e = e + ')'
-        #calculate_genetic_fitness(e, n, m,  training_x, training_y, penalty_weight)
+        return HIGH_FITNESS
+
     # Add bloat
     fitness = calculate_fitness(e, n, m,  training_x, training_y)
     if isinstance(fitness, complex):
@@ -414,8 +418,8 @@ def ga(params: list, inputs:list):
         population, fitnesses = reproduction(population, offspring, fitnesses, offspring_fitnesses, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
         
         elapsed_time = time.time() - start_time
-    return sorted(population, key = lambda x: calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))[0]
-
+    return population[0], fitnesses[0], fitnesses[99]
+    
 # ------------
 # PROGRAM FLOW
 # ------------
@@ -497,6 +501,7 @@ def main():
 # Entry point
 if __name__ == "__main__":
     error_exp = "(pow (sub (log (mul 4 10)) (ifleq (data 10) (add 9 4) (exp 9) (pow 10 9))) (add (exp (ifleq 1 3 1 10)) (ifleq (max 3 9) (div 6 5) (div 4 8) (add 10 7))))"
+    error_exp = "(max (exp (ifleq (max 5 3) (log 5) (pow 5 4) (log 3)) (log 3)))"
     e = sex.loads(error_exp)
-    #evaluate(e, 1,[1])
+    #print("error?", evaluate(e, 1,[1]))
     main()
