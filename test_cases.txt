@@ -21,3 +21,7 @@ python ./hjs115.py  -question 2  -expr "-1.56831209506" -n 2 -m 1000 -data ./dat
 q3
 python ./hjs115.py -question 3 -lambda 100 -n 13 -m 999 -data ./data/cetdl1772small.dat -time_budget 10
 python ./hjs115.py -question 3 -lambda 1 -n 13 -m 999 -data ./data/cetdl1772small.dat -time_budget 10
+
+givign error:
+(max (exp (ifleq (max 5 3) (log 5) (pow 5 4) (log 3)) (log 3)))
+(max (exp 1.58) 1.58)
