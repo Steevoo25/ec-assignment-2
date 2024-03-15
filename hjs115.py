@@ -198,6 +198,8 @@ def squared_error(sexp, y: float, n: int, x: list):
         difference = (y - evaluate(sexp, n, x)) ** 2
     except OverflowError:
         difference = math.inf
+    except TypeError:
+        print(sexp)
     return difference
 
 # Calculated the mean squared error of an s-expression e 
@@ -215,11 +217,27 @@ def calculate_fitness(e, n: int, m: int, training_x:list, training_y:list) -> fl
 # QUESTION 3
 # ------------
 
+# returns the arity of a given branch
+def check_arity(branch: str) -> int:
+    # get function name form branch
+    start = branch.find('(') +1
+    end = branch.find(' ')
+    node_name = branch[start:end]
+    for node in FUNCTION_NODES:
+        if node[0] == node_name:
+            return node[1]
+    return False
+
+
 # Branch swap - swap 2 branches from parents
 def branch_swap_crossover(parent1: str, parent2: str, tree_depth: int, min_depth: int):
     branch_depth = random.randint(min_depth, tree_depth) # from 1 to avoid replacing whole tree
     branch1 = get_branch_at_depth(parent1, branch_depth) # select 2 random branches
     branch2 = get_branch_at_depth(parent2, branch_depth)
+    # check arity of branches is the same
+    while not check_arity(branch1) == check_arity(branch2):
+        branch1 = get_branch_at_depth(parent1, branch_depth)
+        branch2 = get_branch_at_depth(parent2, branch_depth)
     #swap branches
     try:
         parent1 = parent1.replace(get_branch_at_depth(parent1, branch_depth), branch2, 1) 
@@ -351,7 +369,7 @@ def reproduction(population: list, offspring: list,fitnesses: list, offspring_fi
         fitnesses[replacement_index] = offspring_fitnesses[i] # replace fitnesses at i with offspring fitnesses at i
     #population = sorted(population, key=lambda x : calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))
     #population[-offspring_size:] = offspring
-    return population
+    return population, fitnesses
 
 # Introduces a penalty for bloat
 def bloat_penalty(e: str, penalty_weight: float=1) -> float:
@@ -364,8 +382,13 @@ def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y
     try:
         e = sex.loads(e)
     except sex.ExpectClosingBracket:
+        print("expected closing", e)
         e = e + ')'
-        calculate_genetic_fitness(e, n, m,  training_x, training_y, penalty_weight)
+        #calculate_genetic_fitness(e, n, m,  training_x, training_y, penalty_weight)
+    except sex.ExpectNothing:
+        print("expected nothng", e)
+        e = e + ')'
+        #calculate_genetic_fitness(e, n, m,  training_x, training_y, penalty_weight)
     # Add bloat
     fitness = calculate_fitness(e, n, m,  training_x, training_y)
     if isinstance(fitness, complex):
@@ -387,17 +410,16 @@ def ga(params: list, inputs:list):
     
     while elapsed_time < time_budget:
         # Selection
-        parents = tournament_selection(population,fitnesses, tournament_n, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
+        parents = tournament_selection(population, fitnesses, tournament_n, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
         # Variation
         parents = mutation(parents, tree_depth, mutation_rate)
         offspring = crossover(parents, tree_depth, MIN_CROSSOVER_DEPTH, offspring_size)
         # Fitness Calculation
         offspring_fitnesses = [calculate_genetic_fitness(e, n, m, training_x, training_y, penalty_weight) for e in offspring]
         # Reproduction
-        population = reproduction(population, offspring, fitnesses, offspring_fitnesses, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
+        population, fitnesses = reproduction(population, offspring, fitnesses, offspring_fitnesses, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
         
         elapsed_time = time.time() - start_time
-        print(elapsed_time)
     return sorted(population, key = lambda x: calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))[0]
 
 # ------------
