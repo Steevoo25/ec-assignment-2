@@ -228,7 +228,6 @@ def check_arity(branch: str) -> int:
             return node[1]
     return False
 
-
 # Branch swap - swap 2 branches from parents
 def branch_swap_crossover(parent1: str, parent2: str, tree_depth: int, min_depth: int):
     branch_depth = random.randint(min_depth, tree_depth) # from 1 to avoid replacing whole tree
@@ -239,11 +238,10 @@ def branch_swap_crossover(parent1: str, parent2: str, tree_depth: int, min_depth
         branch1 = get_branch_at_depth(parent1, branch_depth)
         branch2 = get_branch_at_depth(parent2, branch_depth)
     #swap branches
-    try:
-        parent1 = parent1.replace(get_branch_at_depth(parent1, branch_depth), branch2, 1) 
-        parent2 = parent2.replace(get_branch_at_depth(parent2, branch_depth), branch1, 1)
-    except AttributeError:
-        print("wrongAttribute in crossover")
+    
+    parent1 = parent1.replace(get_branch_at_depth(parent1, branch_depth)," " + branch2, 1) 
+    parent2 = parent2.replace(get_branch_at_depth(parent2, branch_depth)," " + branch1, 1)
+    
     return parent1, parent2
 
 # Performs the branch swap crossover for a list of parents
@@ -264,7 +262,7 @@ def branch_replacement_mutation(parent: str, treedepth: int) -> str:
     branch_depth = random.randint(1, treedepth-1)
     branch = get_branch_at_depth(parent, branch_depth)
     replacement = full_generation(treedepth - branch_depth)
-    new =  parent.replace(branch, replacement , 1)
+    new =  parent.replace(branch, " " + replacement , 1)
     return new
 
 # Performs mutation on the parents with a given probability
@@ -272,11 +270,6 @@ def mutation(parents: list, treedepth: int, mutation_rate: float) -> list:
     for parent in parents:
         if random.uniform(0,1) < mutation_rate:
             parent = branch_replacement_mutation(parent, treedepth)
-            try:
-                if ')(' in parent:
-                    parent = parent.replace(')(', ') (')
-            except TypeError:
-                print("fortnite")
     return parents
     
 # Returns a random branch at a given depth
@@ -374,7 +367,8 @@ def reproduction(population: list, offspring: list,fitnesses: list, offspring_fi
 # Introduces a penalty for bloat
 def bloat_penalty(e: str, penalty_weight: float=1) -> float:
     # fitness is being minimised so penalty will be positive
-    return len(e) * penalty_weight
+    
+    return e.count('(') * penalty_weight
     
 # Calculate fitness for a string e
 def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y: float, penalty_weight: float):
