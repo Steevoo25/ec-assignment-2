@@ -100,10 +100,8 @@ def diff(exp1, exp2, n, x) -> float:
 
 # Returns the average of a range between 2 indecies
 def avg(exp1, exp2, n, x) -> float:
-
     k = np.abs(math.floor(evaluate(exp1, n, x))) % n
     l = np.abs(math.floor(evaluate(exp2, n, x))) % n
-    print("k , l" , k , l)
     if k == l:
         return 0
     
@@ -113,17 +111,19 @@ def avg(exp1, exp2, n, x) -> float:
     
     if k < l: #exp1 to exp2
         for i in range(k, l+1):
-            sum += data(i)
+            sum += data(i, n, x)
     else: # exp2 to exp1
         for i in range(l, k):
-            sum += data(i)
+            sum += data(i, n, x)
             
     return float(factor * sum)
 
 # Evaluates an s-expression with input vector x of dimension n
 def evaluate(sexp, n: int, x: list) -> float:
     # if its an atom
-    if isinstance(sexp, float):
+    if isinstance(sexp, int):
+        return sexp
+    elif isinstance(sexp, float):
         return sexp
     elif isinstance(sexp, list):
         operator = str(sex.car(sexp))
@@ -157,11 +157,11 @@ def evaluate(sexp, n: int, x: list) -> float:
             elif operator == 'avg':
                 return avg(*operands, n, x)
         except OverflowError:
-            print("Value too large for operation: ", operator, operands, " returning 0 for this step")
+            #print("Value too large for operation: ", operator, operands, " returning 0 for this step")
             return 0
         except TypeError:
-            print("Type error found:", operator, operands, type(operator), type(operands))
-            return 1
+            #print("Type error found:", operator, operands, type(operator), type(operands))
+            return 0
 
 # ------------
 # QUESTION 2
@@ -182,8 +182,12 @@ def open_training_data(training_data: str):
 
 # Calculates the squared error between the evaulation of a s-expression and the output value y
 def squared_error(sexp, y: float, n: int, x: list):
-    difference = y - evaluate(sexp, n, x)
-    return difference ** 2
+    try:
+
+        difference = (y - evaluate(sexp, n, x)) ** 2
+    except OverflowError:
+        difference = math.inf
+    return difference
 
 # Calculated the mean squared error of an s-expression e 
 def calculate_fitness(e, n: int, m: int, training_x:list, training_y:list):
@@ -321,8 +325,8 @@ def generate_population(population_size: int, tree_depth: int) -> list:
     return population
 
 # Replaces less fit individuals in the current population with the offspring
-def reproduction(population: list, offspring: list, offspring_size: int,n: int, m: int, training_data:str ):
-    population = sorted(population, key=lambda x : calculate_genetic_fitness(x, n, m, training_data ))
+def reproduction(population: list, offspring: list, offspring_size: int,n: int, m: int, training_x, training_y ):
+    population = sorted(population, key=lambda x : calculate_genetic_fitness(x, n, m, training_x, training_y))
     population[-offspring_size:] = offspring
     return population
 
@@ -358,7 +362,7 @@ def ga(params: list, inputs:list):
             # Fitness Calculation
             # Fitnesses are not maintained, but calculated when required
         # Reproduction
-        population = reproduction(population, offspring, offspring_size)
+        population = reproduction(population, offspring, offspring_size, n, m, training_x, training_y)
         elapsed_time = time.time() - start_time
 
     return sorted(population, key = lambda x: calculate_genetic_fitness(x, n, m, training_x, training_y))[0]
