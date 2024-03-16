@@ -11,7 +11,7 @@ import random
 SAMPLE_EXP_1 = "(mul (add 1 2) (log 8))"
 SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
-SAMPLE_GA_PARAMS = [4, 2, 2, 0.1, 4]
+#SAMPLE_GA_PARAMS = [4, 2, 2, 0.1, 4]
 HIGH_FITNESS = 10_000
 #tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
 
@@ -268,9 +268,9 @@ def crossover(parents: list, tree_depth: int, min_depth: int, offspring_size: in
 
 # Branch replacement - Pick a random branch, replace with newly generated branch of same depth
 def branch_replacement_mutation(parent: str, treedepth: int) -> str:
-    branch_depth = random.randint(1, treedepth-1)
-    branch = get_branch_at_depth(parent, branch_depth)
-    replacement = full_generation(treedepth - branch_depth)
+    branch_depth = random.randint(1, treedepth - 1) #choose a random depth to replace at
+    branch = get_branch_at_depth(parent, branch_depth) # get branch at chosen depth
+    replacement = full_generation(treedepth)
     new =  parent.replace(branch, " " + replacement , 1)
     return new
 
@@ -396,6 +396,10 @@ def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y
         return HIGH_FITNESS
     except sex.ExpectNothing:
         return HIGH_FITNESS
+    except AssertionError:
+        print("assertion error", e)
+        return HIGH_FITNESS
+        
     fitness = calculate_fitness(e, n, m,  training_x, training_y)
     if isinstance(fitness, complex):
         return HIGH_FITNESS
