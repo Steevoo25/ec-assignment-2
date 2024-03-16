@@ -3,7 +3,7 @@ import optuna
 import pandas as pd
 from matplotlib import pyplot as plt
 
-SAMPLE_GA_PARAMS = [4, 2, 2, 0.1, 4] #tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
+SAMPLE_GA_PARAMS = [4, 2, 5, 0.1, 4] #tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
 DATA_PATH = './data/cetdl1772small.dat'
 N = 13
 M = 999
