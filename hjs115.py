@@ -363,20 +363,16 @@ def reproduction(population: list, offspring: list,fitnesses: list, offspring_fi
     
     ranked_fitnesses = []
     sorted_fitnesses = sorted(fitnesses) # sort fitnesses
+    # rank indexes by fitness
     for i in range(pop_size):
-        fitness_index = fitnesses.index(sorted_fitnesses[i]) # find fitness of ith best element
+        fitness_index = fitnesses.index(sorted_fitnesses[i])
         ranking = [i,fitness_index]
-        ranked_fitnesses.append(ranking) # rank, fitness_index
-    # I have a list of (rank, fitness_index)
+        ranked_fitnesses.append(ranking)
+    # replace lowest ranking indexes with offspring
     for i in range(offspring_size):
-#        print("popsize", pop_size, "index", pop_size-i-1, "rank", ranked_fitnesses[99])
         replacement_index = ranked_fitnesses[pop_size - i - 1][1]
-        #print(replacement_index, population[replacement_index], fitnesses[replacement_index])
         population[replacement_index] = offspring[i] #replace solution at rank i, with offspring i
         fitnesses[replacement_index] = offspring_fitnesses[i] # replace fitnesses at i with offspring fitnesses at i
-        #print("replacing: ",population[replacement_index], " with ", offspring[i])
-    #population = sorted(population, key=lambda x : calculate_genetic_fitness(x, n, m, training_x, training_y, penalty_weight))
-    #population[-offspring_size:] = offspring
     return population, fitnesses
 
 # Introduces a penalty for bloat
