@@ -21,23 +21,33 @@ if __name__ == "__main__":
     def objective(trial):
         # inputs
         training_x, training_y = open_training_data(DATA_PATH)
-        pop_size = trial.suggest_int('pop_size', 20, 400)
+        pop_size = trial.suggest_int('pop_size', 20, 200)
         time_budget = trial.suggest_int('time_budget', 20, 60)
         inputs = [pop_size, N, M, training_x, training_y, time_budget]
         # params
         params = SAMPLE_GA_PARAMS
-        tree_depth = trial.suggest_int('tree_depth', 4,20)
+        tree_depth = trial.suggest_int('tree_depth', 4,6)
         tournament_n = trial.suggest_int('tournament_n', 2,10)
         offspring_size = trial.suggest_int('offspring_size', 2, 20)
         mutation_rate = trial.suggest_float('mutation_rate', 1, 20) / pop_size
         penalty_weight = trial.suggest_float('penalty_weight', 1, 20)
-        params = [tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight]
+        params = tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
         # Define parameter ranges
         #time budget range = 20-60s
-        # Perform SA
+        # Perform SA 100 times
+        best_sol=  ''
+        best_fitness = 0
+        
+        # for i in range(10):
+        #     print(f"ga {i}th iteration")
+            #print(*params, pop_size, time_budget)
         sol, fitness = ga(params=params, inputs=inputs)
+            #if fitness > best_fitness:
+             #   best_sol = sol
+              #  best_fitness = fitness
+        
         # Store results in df
-        df.loc[trial.number] = (sol, fitness, *params, pop_size, time_budget)
+        df.loc[trial.number] = (sol,fitness, *params, pop_size, time_budget)
         return fitness
 
     # Tune parameters
