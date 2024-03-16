@@ -371,8 +371,13 @@ def reproduction(population: list, offspring: list,fitnesses: list, offspring_fi
     # replace lowest ranking indexes with offspring
     for i in range(offspring_size):
         replacement_index = ranked_fitnesses[pop_size - i - 1][1]
-        population[replacement_index] = offspring[i] #replace solution at rank i, with offspring i
-        fitnesses[replacement_index] = offspring_fitnesses[i] # replace fitnesses at i with offspring fitnesses at i
+        try:
+            population[replacement_index] = offspring[i] #replace solution at rank i, with offspring i
+            fitnesses[replacement_index] = offspring_fitnesses[i] # replace fitnesses at i with offspring fitnesses at i
+        except IndexError:
+            print(i, len(offspring), offspring)
+            #population[replacement_index] = offspring[i] #replace solution at rank i, with offspring i
+            #fitnesses[replacement_index] = offspring_fitnesses[i] # replace fitnesses at i with offspring fitnesses at i
     return population, fitnesses
 
 # Introduces a penalty for bloat
@@ -391,22 +396,22 @@ def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y
         return HIGH_FITNESS
     except sex.ExpectNothing:
         return HIGH_FITNESS
-
-    # Add bloat
     fitness = calculate_fitness(e, n, m,  training_x, training_y)
     if isinstance(fitness, complex):
         fitness = fitness.real
     return fitness + penalty
 
 # Performs genetic algorithm with parameters params and agruments inputs
-def ga(params: list, inputs:list):
+def ga(params, inputs):
     # unpack parameters
     tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight = params
     population_size, n, m, training_x, training_y, time_budget = inputs
-    
+    #print("unpack")
     # generate initial population
     population = generate_population(population_size, tree_depth)
+    #print("generate")
     fitnesses = [calculate_genetic_fitness(e, n, m, training_x, training_y, penalty_weight) for e in population]
+    #print("fitness")
     # initialise timer
     start_time = time.time()
     elapsed_time = 0
@@ -414,15 +419,19 @@ def ga(params: list, inputs:list):
     while elapsed_time < time_budget:
         # Selection
         parents = tournament_selection(population, fitnesses, tournament_n, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
+        #print("selection")
         # Variation
         parents = mutation(parents, tree_depth, mutation_rate)
         offspring = crossover(parents, tree_depth, MIN_CROSSOVER_DEPTH, offspring_size)
+        #print("variation")
         
         # Fitness Calculation
         offspring_fitnesses = [calculate_genetic_fitness(e, n, m, training_x, training_y, penalty_weight) for e in offspring]
+        #print("fitness calc")
         # Reproduction
         population, fitnesses = reproduction(population, offspring, fitnesses, offspring_fitnesses, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
-        
+        #print("reprod")
+        #print(len(population))
         elapsed_time = time.time() - start_time
     
     sorted_list = sorted(list(zip(population, fitnesses)), key= lambda x : x[1])
