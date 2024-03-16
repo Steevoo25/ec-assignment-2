@@ -372,8 +372,8 @@ def reproduction(population: list, offspring: list,fitnesses: list, offspring_fi
     for i in range(offspring_size):
         replacement_index = ranked_fitnesses[pop_size - i - 1][1]
         try:
-            population[replacement_index] = offspring[i] #replace solution at rank i, with offspring i
-            fitnesses[replacement_index] = offspring_fitnesses[i] # replace fitnesses at i with offspring fitnesses at i
+            population[replacement_index] = offspring[i-1] #replace solution at rank i, with offspring i
+            fitnesses[replacement_index] = offspring_fitnesses[i-1] # replace fitnesses at i with offspring fitnesses at i
         except IndexError:
             print(i, len(offspring), offspring)
             #population[replacement_index] = offspring[i] #replace solution at rank i, with offspring i
