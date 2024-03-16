@@ -3,12 +3,17 @@ import optuna
 import pandas as pd
 from matplotlib import pyplot as plt
 
+DATA_PATH = './data/cetdl1772small.dat'
+N = 13
+M = 999
+
 
 if __name__ == "__main__":
+    
     # Test different parameter setting and collect the data (plot)
     columns = ["solution", "fitness", "tree_depth", "tournament_n", "offspring_size", "mutation_rate", "penalty_weight", "population_size"]
     
-    training_x, training_y = open_training_data()
+    training_x, training_y = open_training_data(DATA_PATH)
     
     # Initialise df columns
     df = pd.DataFrame(columns=columns)
@@ -22,7 +27,7 @@ if __name__ == "__main__":
         params = [tree_depth, tournament_n, offspring_size, mutation_rate]
         pop_size = 0
         budget = 0
-        inputs = [pop_size, n, m, training_x, training_y, budget]
+        inputs = [pop_size, N, M, training_x, training_y, budget]
         # Define parameter ranges
         #time budget range = 20-60s
         # Perform SA
@@ -45,10 +50,7 @@ if __name__ == "__main__":
     df = df.sort_values(by='fitness')
     df.index.name = 'Index'
     print(df)
-
-    # print mean and standard deviations
-    print(df.mean())
-    print(df.std())
+    
     
     # Generate box plots
     
