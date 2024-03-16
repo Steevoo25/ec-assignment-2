@@ -3,13 +3,14 @@ import optuna
 import pandas as pd
 from matplotlib import pyplot as plt
 
-SAMPLE_GA_PARAMS = [4, 2, 5, 0.1, 2] #tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
+SAMPLE_GA_PARAMS = [5, 2, 5, 0.1, 1.1] #tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
 DATA_PATH = './data/cetdl1772small.dat'
 N = 13
 M = 999
 
 
 if __name__ == "__main__":
+
     
     # Test different parameter setting and collect the data (plot)
     columns = ["solution", "fitness", "tree_depth", "tournament_n", "offspring_size", "mutation_rate", "penalty_weight", "population_size", "time_budget"]
@@ -28,11 +29,11 @@ if __name__ == "__main__":
         inputs = [pop_size, N, M, training_x, training_y, time_budget]
         # params
         tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight = SAMPLE_GA_PARAMS
-        tree_depth = trial.suggest_int('tree_depth', 3,10)
-        # tournament_n = trial.suggest_int('tournament_n', 2,10)
-        # offspring_size = trial.suggest_int('offspring_size', 2, 20)
-        # mutation_rate = trial.suggest_float('mutation_rate', 1, 20) / pop_size
-        # penalty_weight = trial.suggest_float('penalty_weight', 1, 20)
+        #tree_depth = trial.suggest_int('tree_depth', 3,10)
+        #tournament_n = trial.suggest_int('tournament_n', 2,10)
+        #offspring_size = trial.suggest_int('offspring_size', 2, 20)
+        mutation_rate = trial.suggest_float('mutation_rate', 1, 20) / pop_size
+        #penalty_weight = trial.suggest_float('penalty_weight', 1, 4)
         params = tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
 
         sol, fitness = ga(params=params, inputs=inputs)
@@ -41,7 +42,7 @@ if __name__ == "__main__":
         return fitness
 
     # Tune parameters
-    study = optuna.create_study(study_name='tree_depth')
+    study = optuna.create_study(study_name='mutation_rate')
     study.optimize(objective, n_trials=100)
 
     # Print best results
@@ -54,7 +55,7 @@ if __name__ == "__main__":
     df = df.sort_values(by='fitness')
     df.index.name = 'Index'
     print(df)
-    df.to_csv("./data/tree_depth.csv", index=True)
+    df.to_csv("./data/mutation_rate.csv", index=True)
     
     # Generate box plots
     plt.boxplot(df['fitness'])

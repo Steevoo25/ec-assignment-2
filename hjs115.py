@@ -433,9 +433,8 @@ def ga(params, inputs):
         #print("reprod")
         #print(len(population))
         elapsed_time = time.time() - start_time
-    sorted_list = sorted(list(zip(population, fitnesses)), key= lambda x : x[1])
     
-    return sorted_list[0]
+    return population[0]
     
 # ------------
 # PROGRAM FLOW
