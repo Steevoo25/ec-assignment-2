@@ -11,7 +11,8 @@ import random
 SAMPLE_EXP_1 = "(mul (add 1 2) (log 8))"
 SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
-#SAMPLE_GA_PARAMS = [4, 2, 2, 0.1, 4]
+SAMPLE_GA_PARAMS = [4, 2, 2, 0.1, 4]
+TUNED_GA_PARAMS = [5, 2, 16, 0.14, 1.1]
 HIGH_FITNESS = 10_000
 #tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
 
