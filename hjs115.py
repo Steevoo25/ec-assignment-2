@@ -398,7 +398,7 @@ def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y
         return HIGH_FITNESS
     fitness = calculate_fitness(e, n, m,  training_x, training_y)
     if isinstance(fitness, complex):
-        fitness = fitness.real
+        return HIGH_FITNESS
     return fitness + penalty
 
 # Performs genetic algorithm with parameters params and agruments inputs
@@ -415,7 +415,7 @@ def ga(params, inputs):
     #print("fitness")
     # initialise timer
     elapsed_time = time.time()
-    
+    print(f"time elapsed after inits {elapsed_time}")
     while elapsed_time < time_budget:
         # Selection
         parents = tournament_selection(population, fitnesses, tournament_n, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
@@ -517,8 +517,4 @@ def main():
 
 # Entry point
 if __name__ == "__main__":
-    error_exp = "(pow (sub (log (mul 4 10)) (ifleq (data 10) (add 9 4) (exp 9) (pow 10 9))) (add (exp (ifleq 1 3 1 10)) (ifleq (max 3 9) (div 6 5) (div 4 8) (add 10 7))))"
-    error_exp = "(max (exp (ifleq (max 5 3) (log 5) (pow 5 4) (log 3)) (log 3)))"
-    e = sex.loads(error_exp)
-    #print("error?", evaluate(e, 1,[1]))
     main()
