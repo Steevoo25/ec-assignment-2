@@ -20,7 +20,7 @@ if __name__ == "__main__":
     # Returns fitness of SA with randomly generated parameters
     def objective(trial):
         pop_size = 100
-        time_budget = 40
+        time_budget = 30
         # inputs
         training_x, training_y = open_training_data(DATA_PATH)
         # pop_size = trial.suggest_int('pop_size', 20, 200)
@@ -57,5 +57,6 @@ if __name__ == "__main__":
     df.to_csv("./data/tree_depth.csv", index=True)
     
     # Generate box plots
+    plt.boxplot(df['fitness'])
     
     #observe results
