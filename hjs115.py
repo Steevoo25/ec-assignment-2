@@ -404,6 +404,7 @@ def calculate_genetic_fitness(e:str,n: int, m: int, training_x: list, training_y
 # Performs genetic algorithm with parameters params and agruments inputs
 def ga(params, inputs):
     start_time = time.time()
+    elapsed_time = 0
     # unpack parameters
     tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight = params
     population_size, n, m, training_x, training_y, time_budget = inputs
@@ -414,8 +415,7 @@ def ga(params, inputs):
     fitnesses = [calculate_genetic_fitness(e, n, m, training_x, training_y, penalty_weight) for e in population]
     #print("fitness")
     # initialise timer
-    elapsed_time = time.time()
-    print(f"time elapsed after inits {elapsed_time}")
+    elapsed_time = time.time() - start_time
     while elapsed_time < time_budget:
         # Selection
         parents = tournament_selection(population, fitnesses, tournament_n, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
@@ -433,8 +433,8 @@ def ga(params, inputs):
         #print("reprod")
         #print(len(population))
         elapsed_time = time.time() - start_time
-        print(f"elapsed time {elapsed_time}")
     sorted_list = sorted(list(zip(population, fitnesses)), key= lambda x : x[1])
+    
     return sorted_list[0]
     
 # ------------
