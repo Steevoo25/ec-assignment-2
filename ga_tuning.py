@@ -11,7 +11,6 @@ M = 999
 
 if __name__ == "__main__":
 
-    
     # Test different parameter setting and collect the data (plot)
     columns = ["solution", "fitness", "tree_depth", "tournament_n", "offspring_size", "mutation_rate", "penalty_weight", "population_size", "time_budget"]
     
@@ -24,7 +23,7 @@ if __name__ == "__main__":
         time_budget = 30
         # inputs
         training_x, training_y = open_training_data(DATA_PATH)
-        # pop_size = trial.suggest_int('pop_size', 20, 200)
+        pop_size = trial.suggest_int('pop_size', 20, 200)
         # time_budget = trial.suggest_int('time_budget', 20, 60)
         inputs = [pop_size, N, M, training_x, training_y, time_budget]
         # params
@@ -32,17 +31,18 @@ if __name__ == "__main__":
         #tree_depth = trial.suggest_int('tree_depth', 3,10)
         #tournament_n = trial.suggest_int('tournament_n', 2,10)
         #offspring_size = trial.suggest_int('offspring_size', 2, 20)
-        mutation_rate = trial.suggest_float('mutation_rate', 1, 20) / pop_size
+        #mutation_rate = trial.suggest_float('mutation_rate', 1/pop_size, 20/pop_size)
         #penalty_weight = trial.suggest_float('penalty_weight', 1, 4)
         params = tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
 
         sol, fitness = ga(params=params, inputs=inputs)
         # Store results in df
         df.loc[trial.number] = (sol,fitness, *params, pop_size, time_budget)
+        df.to_csv("./data/population_size.csv", index=True)
         return fitness
 
     # Tune parameters
-    study = optuna.create_study(study_name='mutation_rate')
+    study = optuna.create_study(study_name='population_size')
     study.optimize(objective, n_trials=100)
 
     # Print best results
@@ -55,9 +55,8 @@ if __name__ == "__main__":
     df = df.sort_values(by='fitness')
     df.index.name = 'Index'
     print(df)
-    df.to_csv("./data/mutation_rate.csv", index=True)
+    #df.to_csv("./data/population_size.csv", index=True)
     
     # Generate box plots
     plt.boxplot(df['fitness'])
-    
     #observe results
