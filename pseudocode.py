@@ -4,6 +4,7 @@ Generate initial population-
 			add random_function_node
 		for empty_branch in tree:
 			add random_terminal_node
+Calculate fitness of each element in population
 Start timer
 while timer < budget:
 	perform selection - 
@@ -29,5 +30,4 @@ while timer < budget:
 			calculate fitness of population
 			replace offspring_size many worst elements in population with offspring
 
-calculate fitness of each element in population
 return element with lowest fitness

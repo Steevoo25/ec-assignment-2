@@ -24,7 +24,7 @@ if __name__ == "__main__":
         # inputs
         training_x, training_y = open_training_data(DATA_PATH)
         #pop_size = trial.suggest_int('pop_size', 20, 200)
-        time_budget = trial.suggest_int('time_budget', 20, 60)
+        #time_budget = trial.suggest_int('time_budget', 20, 60)
         inputs = [pop_size, N, M, training_x, training_y, time_budget]
         # params
         tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight = SAMPLE_GA_PARAMS
