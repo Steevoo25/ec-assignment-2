@@ -10,4 +10,6 @@ for param in tuning_params:
     df = df['fitness'] # filter to fitness
     plt.boxplot(df)
     plt.title(f"Boxplot of fitnesses for {param}")
+    plt.ylim(1000,4000)
+    plt.savefig(fname=f'./data/plots/{param}')
     plt.show()
