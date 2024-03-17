@@ -14,10 +14,11 @@ SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
 SAMPLE_GA_PARAMS = [4, 2, 2, 0.1, 4]
 TUNED_GA_PARAMS = [5, 2, 16, 0.14, 1.1]
 HIGH_FITNESS = 10_000
+NUMBERS = '1234567890'
 #tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
 
 FUNCTION_NODES = [('add', 2),('sub', 2),('mul', 2),('div', 2),('pow', 2),('sqrt', 1),('log', 1),('exp', 1),('max', 2),('ifleq', 4),('data', 1),('diff', 2),('avg', 2)]
-MIN_CROSSOVER_DEPTH = 1
+MIN_CROSSOVER_DEPTH = 2
 
 # ------------
 # QUESTION 1
@@ -225,8 +226,8 @@ def calculate_fitness(e, n: int, m: int, training_x:list, training_y:list) -> fl
 # returns the arity of a given branch
 def check_arity(branch: str) -> int:
     # get function name form branch
-    start = branch.find('(') +1
-    end = branch.find(' ')
+    start = branch.find('(') + 1
+    end = branch.find(' ', start)
     node_name = branch[start:end]
     for node in FUNCTION_NODES:
         if node[0] == node_name:
@@ -236,21 +237,25 @@ def check_arity(branch: str) -> int:
 # Branch swap - swap 2 branches from parents
 def branch_swap_crossover(parent1: str, parent2: str, tree_depth: int, min_depth: int):
     branch_depth = random.randint(min_depth, tree_depth) # from 1 to avoid replacing whole tree
+    
     branch1 = get_branch_at_depth(parent1, branch_depth) # select 2 random branches
     branch2 = get_branch_at_depth(parent2, branch_depth)
     # check arity of branches is the same
     while not check_arity(branch1) == check_arity(branch2):
+        branch_depth = random.randint(min_depth, tree_depth)
         branch1 = get_branch_at_depth(parent1, branch_depth)
         branch2 = get_branch_at_depth(parent2, branch_depth)
     #swap branches
     
-    parent1 = parent1.replace(get_branch_at_depth(parent1, branch_depth), branch2, 1) 
-    parent2 = parent2.replace(get_branch_at_depth(parent2, branch_depth), branch1, 1)
+    parent1 = parent1.replace('(' + get_branch_at_depth(parent1, branch_depth) + ')', branch2, 1) 
+    parent2 = parent2.replace('(' + get_branch_at_depth(parent2, branch_depth) + ')', branch1, 1)
     
     if ')(' in parent1:
         parent1 = parent1.replace(')(', ') (')
     if ')(' in parent2:
         parent2 = parent2.replace(')(', ') (')
+    
+        
     
     return parent1, parent2
 
@@ -272,7 +277,9 @@ def branch_replacement_mutation(parent: str, treedepth: int) -> str:
     branch_depth = random.randint(1, treedepth - 1) #choose a random depth to replace at
     branch = get_branch_at_depth(parent, branch_depth) # get branch at chosen depth
     replacement = full_generation(treedepth)
-    new =  parent.replace(branch, " " + replacement , 1)
+    new =  parent.replace(branch, replacement , 1)
+    if ')(' in new:
+        new = new.replace(')(', ') (')
     return new
 
 # Performs mutation on the parents with a given probability
@@ -293,13 +300,17 @@ def get_branch_at_depth(exp: str, depth: int) -> str:
     for i, char in enumerate(exp):
         if current_depth == depth:
             if temp_exp == []:
-                return get_branch_at_depth(exp, depth-1) # if nothing has been found, look one layer up
+                return get_branch_at_depth(exp, 1) # if nothing has been found, look at depth 1
             return temp_exp
             
         else:
             if char == '(':
                 current_depth +=1
                 temp_exp = find_balanced_expression(exp[i:])
+            if char == ')':
+                current_depth -= 1
+            if char in NUMBERS: # if we are at a leaf node, return it
+                return char
     return temp_exp
 
 # Returns a list of all sub-expressions at the uppermost level    
@@ -343,7 +354,7 @@ def tournament_selection(population: list, fitnesses: list, tournament_n: int, o
 
 # Generates a single member of population using full generation
 def full_generation(tree_depth: int) -> str:
-    if tree_depth == 0:
+    if tree_depth <= 0:
         # At the leaf level, generate a random function or data node
         return f"{random.randint(1, 10)}"
     else:
@@ -433,7 +444,6 @@ def ga(params, inputs):
         population, fitnesses = reproduction(population, offspring, fitnesses, offspring_fitnesses, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
 
         elapsed_time = time.time() - start_time
-    
     return population[0], fitnesses[0]
     
 # ------------
