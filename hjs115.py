@@ -11,7 +11,6 @@ import random
 SAMPLE_EXP_1 = "(mul (add 1 2) (log 8))"
 SAMPLE_EXP_2 = "(max (data 0) (data 1))"
 SAMPLE_EXP_3 = "(max (sub (mul 2 3) (add 1 1)) (exp (add 4 6)))"
-SAMPLE_GA_PARAMS = [4, 2, 2, 0.1, 4]
 TUNED_GA_PARAMS = [5, 2, 16, 0.14, 1.1]
 HIGH_FITNESS = 10_000
 NUMBERS = '1234567890'
@@ -116,13 +115,16 @@ def diff(exp1, exp2, n, x) -> float:
 
 # Returns the average of a range between 2 indecies
 def avg(exp1, exp2, n, x) -> float:
+    # evaluate indecies avg between
     k = np.abs(math.floor(evaluate(exp1, n, x))) % n
     l = np.abs(math.floor(evaluate(exp2, n, x))) % n
+    
     if k == l:
         return 0
-    
+        
     difference = np.abs(k - l) + 1
     factor = 1/difference
+    
     sum = 0
     
     if k < l: #exp1 to exp2
@@ -237,25 +239,24 @@ def check_arity(branch: str) -> int:
 # Branch swap - swap 2 branches from parents
 def branch_swap_crossover(parent1: str, parent2: str, tree_depth: int, min_depth: int):
     branch_depth = random.randint(min_depth, tree_depth) # from 1 to avoid replacing whole tree
-    
     branch1 = get_branch_at_depth(parent1, branch_depth) # select 2 random branches
     branch2 = get_branch_at_depth(parent2, branch_depth)
-    # check arity of branches is the same
+    
+    # make sure arity of branches is the same
     while not check_arity(branch1) == check_arity(branch2):
         branch_depth = random.randint(min_depth, tree_depth)
         branch1 = get_branch_at_depth(parent1, branch_depth)
         branch2 = get_branch_at_depth(parent2, branch_depth)
+        
     #swap branches
-    
     parent1 = parent1.replace('(' + get_branch_at_depth(parent1, branch_depth) + ')', branch2, 1) 
     parent2 = parent2.replace('(' + get_branch_at_depth(parent2, branch_depth) + ')', branch1, 1)
     
+    # if spacing is wierd, correct it
     if ')(' in parent1:
         parent1 = parent1.replace(')(', ') (')
     if ')(' in parent2:
         parent2 = parent2.replace(')(', ') (')
-    
-        
     
     return parent1, parent2
 
@@ -444,7 +445,8 @@ def ga(params, inputs):
         population, fitnesses = reproduction(population, offspring, fitnesses, offspring_fitnesses, offspring_size, population_size, n, m, training_x, training_y, penalty_weight)
 
         elapsed_time = time.time() - start_time
-    return population[0], fitnesses[0]
+        
+    return population[0]#, fitnesses[0]
     
 # ------------
 # PROGRAM FLOW
