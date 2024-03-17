@@ -1,7 +1,7 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 
-tuning_params = ["tree_depth", "offspring_size", "mutation_rate", "penalty_weight"]#, "population_size", "time_budget"]
+tuning_params = ["tree_depth", "offspring_size", "mutation_rate", "penalty_weight", "population_size", "time_budget"]
 
 for param in tuning_params:
     filepath = f"./data/{param}.csv" # get filename
