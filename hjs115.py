@@ -485,7 +485,7 @@ def select_question(args):
         time_budget = float(time_budget)
         training_x, training_y = open_training_data(training_data) # open file
         #training_x = [float(num) for num in training_x.split(' ')]
-        params = SAMPLE_GA_PARAMS # [0] = tree depth, [1] = tournament_n, [2] = offspring_size, [3] = mutation_rate
+        params = TUNED_GA_PARAMS # [0] = tree depth, [1] = tournament_n, [2] = offspring_size, [3] = mutation_rate
         inputs = [pop_size, n, m, training_x, training_y, time_budget] # [0] = population_size, [1] = n, [2] = m, [3] = training_data, [4] = time_budget
         result = ga(params=params, inputs=inputs)
         
