@@ -9,4 +9,5 @@ for param in tuning_params:
     df = df[df['fitness'] < 4000]
     df = df['fitness'] # filter to fitness
     plt.boxplot(df)
+    plt.title(f"Boxplot of fitnesses for {param}")
     plt.show()
