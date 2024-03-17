@@ -6,6 +6,7 @@ tuning_params = ["tree_depth", "offspring_size", "mutation_rate", "penalty_weigh
 for param in tuning_params:
     filepath = f"./data/{param}.csv" # get filename
     df = pd.read_csv(filepath) # open csv
+    df = df[df['fitness'] < 4000]
     df = df['fitness'] # filter to fitness
     plt.boxplot(df)
     plt.show()
