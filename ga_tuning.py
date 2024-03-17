@@ -1,9 +1,9 @@
 from hjs115 import ga, open_training_data
 import optuna
 import pandas as pd
-from matplotlib import pyplot as plt
 
 SAMPLE_GA_PARAMS = [5, 2, 5, 0.1, 1.1] #tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight
+
 DATA_PATH = './data/cetdl1772small.dat'
 N = 13
 M = 999
@@ -23,8 +23,8 @@ if __name__ == "__main__":
         time_budget = 30
         # inputs
         training_x, training_y = open_training_data(DATA_PATH)
-        pop_size = trial.suggest_int('pop_size', 20, 200)
-        # time_budget = trial.suggest_int('time_budget', 20, 60)
+        #pop_size = trial.suggest_int('pop_size', 20, 200)
+        time_budget = trial.suggest_int('time_budget', 20, 60)
         inputs = [pop_size, N, M, training_x, training_y, time_budget]
         # params
         tree_depth, tournament_n, offspring_size, mutation_rate, penalty_weight = SAMPLE_GA_PARAMS
@@ -37,12 +37,13 @@ if __name__ == "__main__":
 
         sol, fitness = ga(params=params, inputs=inputs)
         # Store results in df
+        print(sol)
         df.loc[trial.number] = (sol,fitness, *params, pop_size, time_budget)
-        df.to_csv("./data/population_size.csv", index=True)
+        df.to_csv("./data/time_budget.csv", index=True)
         return fitness
 
     # Tune parameters
-    study = optuna.create_study(study_name='population_size')
+    study = optuna.create_study(study_name='time_budget')
     study.optimize(objective, n_trials=100)
 
     # Print best results
@@ -54,9 +55,6 @@ if __name__ == "__main__":
     # Show all results
     df = df.sort_values(by='fitness')
     df.index.name = 'Index'
-    print(df)
-    #df.to_csv("./data/population_size.csv", index=True)
+    df.to_csv("./data/time_budget.csv", index=True)
     
-    # Generate box plots
-    plt.boxplot(df['fitness'])
-    #observe results
+    print(df)
